@@ -666,7 +666,6 @@ var Node = /*#__PURE__*/function () {
           return Promise.resolve(_this3.popstate({
             request: request,
             response: popstateResult,
-            popstateResult: popstateResult,
             config: _this3.config
           }));
         }
@@ -830,20 +829,20 @@ var Node = /*#__PURE__*/function () {
     }
   }, {
     key: "setState",
-    value: function setState(path, stateReducer) {
-      magna.setState(path, stateReducer);
+    value: function setState(path, stateSetter) {
+      magna.setState(path, stateSetter);
       return magna.getState(path);
     }
   }, {
     key: "subscribe",
-    value: function subscribe(path, cb) {
-      magna.subscribe(this, path, cb);
+    value: function subscribe(path, stateViewer) {
+      magna.subscribe(this, path, stateViewer);
       return true;
     }
   }, {
     key: "unsubscribe",
-    value: function unsubscribe(path, cb) {
-      magna.unsubscribe(this, path, cb);
+    value: function unsubscribe(path, stateViewer) {
+      magna.unsubscribe(this, path, stateViewer);
       return true;
     }
   }, {
@@ -1901,6 +1900,8 @@ var Magna = /*#__PURE__*/function (_Node) {
       }
 
       this.__subscribers.set(path, listeners);
+
+      return true;
     }
   }, {
     key: "unsubscribe",
@@ -2200,12 +2201,12 @@ var Plugin = /*#__PURE__*/function (_Node) {
 
   var _super = _createSuper(Plugin);
 
-  function Plugin(options) {
+  function Plugin(config) {
     var _this;
 
     _classCallCheck(this, Plugin);
 
-    _this = _super.call(this, options);
+    _this = _super.call(this, config);
 
     _defineProperty(_assertThisInitialized(_this), _Symbol$toStringTag$5, 'Plugin');
 

@@ -6,8 +6,8 @@ export default class Plugin extends Node {
 
   [Symbol.toStringTag] = 'Plugin'
 
-  constructor(options) {
-    super(options)
+  constructor(config) {
+    super(config)
   }
   init({ request }) {
     return request.url

@@ -132,8 +132,7 @@ export default class Node {
               this.popstate({
                 request,
                 response: popstateResult,
-                popstateResult,
-                config: this.config
+                config: this.config,
               })
             )
           }
@@ -233,18 +232,18 @@ export default class Node {
     }
   }
 
-  setState(path, stateReducer) {
-    magna.setState(path, stateReducer)
+  setState(path, stateSetter) {
+    magna.setState(path, stateSetter)
     return magna.getState(path)
   }
 
-  subscribe(path, cb) {
-    magna.subscribe(this, path, cb)
+  subscribe(path, stateViewer) {
+    magna.subscribe(this, path, stateViewer)
     return true
   }
 
-  unsubscribe(path, cb) {
-    magna.unsubscribe(this, path, cb)
+  unsubscribe(path, stateViewer) {
+    magna.unsubscribe(this, path, stateViewer)
     return true
   }
 

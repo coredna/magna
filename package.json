@@ -30,7 +30,7 @@
     "ajax"
   ],
   "author": "Andrew Fountain",
-  "license": "GPL-3.0",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/coredna/magna/issues"
   },

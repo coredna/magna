@@ -243,6 +243,7 @@ export default class Magna extends Node {
       listeners.push({ instance, cb, state: {} })
     }
     this.__subscribers.set(path, listeners)
+    return true
   }
 
   unsubscribe(instance, path, cb) {

@@ -1,7 +1,5 @@
 import Node from './Node'
 
-import { tap, log } from '../utils'
-
 export default class Singleton extends Node {
 
   [Symbol.toStringTag] = 'Singleton'
