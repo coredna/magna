@@ -1,4 +1,4 @@
-export default str => {
+export default function regexify(str) {
   const index = []
   const params = {}
   const string = str instanceof RegExp ? false : str

@@ -9,8 +9,7 @@ loads.
  when our module should be pulled in and will only ever be called once to join the module to the application.
 
 ```javascript
-import magna from 'magna'
-import Import from 'magna/Import'
+import magna, { Import, route } from '@coredna/magna'
 
 magna.init([
   route('/catalogue', [

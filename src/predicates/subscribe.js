@@ -1,5 +1,5 @@
 import Node from '../types/Node'
-import magna from "@magna";
+import magna from "../magna";
 import { INITIALIZED } from '../symbols'
 
 /*
@@ -19,7 +19,7 @@ import { INITIALIZED } from '../symbols'
 * ])
 * ```
 */
-export default class Subscribe extends Node {
+export class Subscribe extends Node {
 
   constructor(event, nodes) {
     super({ event }, nodes)
@@ -44,5 +44,5 @@ export default class Subscribe extends Node {
   }
 }
 
-export const subscribe = (target, event, nodes) =>
+export default (target, event, nodes) =>
   new Subscribe(target, event, nodes)

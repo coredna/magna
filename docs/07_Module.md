@@ -8,9 +8,7 @@ If you needed to run a bunch of plugins for a module eg the Blog module, or a Po
  all the plugins that bring life to your page
 
 ```javascript
-import magna from 'magna'
-import Node from 'magna/Node'
-import Module from 'magna/Module'
+import magna, { Node, Module } from '@coredna/magna'
 
 // create your module class based on the `Module`
 class Catalogue extends Module {

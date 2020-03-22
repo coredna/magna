@@ -3,9 +3,8 @@ The `Singleton` is a `Plugin` that will never be destroyed or re-initialized aft
 example plugin will only be bound to your page once, and will never be destroyed if you change the page.
 
 ```javascript
-import magna from 'magna'
+import magna, { Singleton } from '@coredna/magna'
 import $ from 'jquery'
-import Singleton from 'magna/Singleton'
 
 class MySingleton extends Singleton {
   init({ request }) {

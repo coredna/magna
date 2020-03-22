@@ -1,8 +1,7 @@
 import Node from './Node'
-import $ from 'jquery'
 import {INIT_PROMISE, INITIALIZED} from '../symbols'
 import Request from '../request/Request'
-import qs from 'qs'
+import qs from 'query-string'
 import {
   logRoute,
   logAction,
@@ -10,10 +9,10 @@ import {
   combineUrlParams
 } from '../utils';
 
-import ramdaLensPath from 'ramda/src/lensPath'
-import ramdaOver from 'ramda/src/over'
-import ramdaView from 'ramda/src/view'
-import ramdaEquals from 'ramda/src/equals'
+import { lensPath } from 'rambda/src/lensPath'
+import { over } from 'rambda/src/over'
+import { view } from 'rambda/src/view'
+import { equals } from 'rambda/src/equals'
 
 const states = []
 let STATE_UUID = 0
@@ -186,58 +185,16 @@ export default class Magna extends Node {
   __setActiveUrl() {
     const escapedPathname = location.pathname
       .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-    $('.link--active').removeClass('link--active')
-    $(`a[href]`)
-      .filter(function() {
-        const href = this.href.replace(location.origin, '')
+    document.querySelectorAll('.link--active').forEach(element =>
+      element.classList.remove('link--active')
+    )
+    ;([...document.querySelectorAll('a[href]')])
+      .filter(element => {
+        const href = element.href.replace(location.origin, '')
         return new RegExp("^" + escapedPathname + "$").test(href)
       })
-      .addClass('link--active')
+      .forEach(element => element.classList.add('link--active'))
   }
-
-  static post = (() => {
-    const timeout = 30000
-    /*
-    const keepAlive = () => {
-      $.post('/index.php?action=register&form_name=keepAlive', {
-        custom_data: 'json/keepalive'
-      }, null, 'json')
-      .then(() => {
-        timer = setTimeout(keepAlive, timeout)
-      })
-    }
-    let timer = setTimeout(keepAlive, timeout)
-     */
-
-    return (url, data, { headers, method, dataType, $target } = { method: 'post', dataType: 'json' }) => {
-      const xhr = new XMLHttpRequest
-      return $.ajax({
-        url,
-        data,
-        method,
-        dataType,
-        xhr: () => xhr,
-        ...(typeof(headers) !== 'undefined' &&
-          typeof(headers) === 'function'
-            ? { beforeSend: (xhr) => headers(xhr, $target) }
-            : { headers }
-          ),
-      })
-      /*
-      .then(tap(response => {
-        clearTimeout(timer)
-        timer = setTimeout(keepAlive, timeout)
-      }))
-         */
-      .catch(error => {
-        $('body')
-          .removeClass('loading')
-          .addClass('error')
-        $('.content').html(`<h1>404: Oops we can't find what you are looking for</h1>`)
-      })
-    }
-
-  })()
 
   getState(path) {
     return { ...this.__state }
@@ -247,9 +204,9 @@ export default class Magna extends Node {
     if (typeof path === 'string') path = path.split('.')
     path = path || ['global']
     const oldState = this.__state
-    const lens = ramdaLensPath(path)
+    const lens = lensPath(path)
     // set the new state
-    const newState = ramdaOver(lens, stateUpdater, this.__state)
+    const newState = over(lens, stateUpdater, this.__state)
     // const newState = stateUpdater(this.__state)
     if (newState === this.__state) {
       throw new Error('Do not mutate the state, please return a new object for the state')
@@ -258,24 +215,18 @@ export default class Magna extends Node {
 
     // trigger any subscribers
     for (const [subscribePath, subscribers] of this.__subscribers) {
-      const subscribeLens = ramdaLensPath(subscribePath.split('.'))
-      const a = ramdaView(subscribeLens, oldState)
-      const b = ramdaView(subscribeLens, newState)
+      const subscribeLens = lensPath(subscribePath.split('.'))
+      const a = view(subscribeLens, oldState)
+      const b = view(subscribeLens, newState)
       // check to see if the previous state has changed at this path
-      if (!ramdaEquals(a, b)) {
+      if (!equals(a, b)) {
         // state has changed, fire the events
         subscribers.forEach(({ instance, cb }) => {
           if (instance[INITIALIZED]) {
-            ramdaOver(subscribeLens, cb, newState)
+            over(subscribeLens, cb, newState)
           }
         })
       }
-      /*
-      console.log('equals', R.equals(subscribePath, path))
-      if (subscriber[NODE_INITIALIZED] && R.equals(subscribePath, path)) {
-        callbacks.forEach(cb => R.over(lens, cb, newState))
-      }
-      */
     }
     return this
   }

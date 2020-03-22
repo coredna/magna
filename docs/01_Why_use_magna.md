@@ -13,8 +13,7 @@ manage modules, Magna can improve your code.
 Here is a simple example of what can be achieved using Magna.
 
 ```javascript
-import magna from 'magna'
-import route from 'magna/route'
+import magna, { route } from '@coredna/magna'
 
 import MobileNavigation from './plugins/MobileNavigation'
 

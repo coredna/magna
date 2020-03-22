@@ -1,17 +1,16 @@
+import magna from '../magna'
+
 import {
   INITIALIZED,
-  INIT_PROMISE,
   INIT_DONE,
+  INIT_PROMISE,
   POPSTATE_DONE,
   POPSTATE_PROMISE,
 } from '../symbols'
 
-import mergeDeepRight from 'ramda/src/mergeDeepRight'
-
-import magna from '../'
-
 import log from '../utils/log'
-import { minimumLetters } from '../utils'
+import mergeDeepRight from '../utils/mergeDeepRight'
+import pad from '../utils/pad'
 
 const PARENTS = new Map
 const makeId = ((id) => () => (id++).toString(16))(16000)
@@ -100,7 +99,8 @@ export default class Node {
           return Promise.resolve(
             this.init({
               request,
-              response
+              response,
+              config: this.config,
             })
           )
         }
@@ -132,7 +132,8 @@ export default class Node {
               this.popstate({
                 request,
                 response: popstateResult,
-                popstateResult
+                popstateResult,
+                config: this.config
               })
             )
           }
@@ -158,7 +159,7 @@ export default class Node {
       this[INITIALIZED] = false
       const resolved = this.nodes.map(node => node.runDestroy({ request }))
       return Promise.all([
-        this.destroy({ request }),
+        this.destroy({ request, config: this.config }),
         ...resolved
       ])
     }
@@ -174,7 +175,7 @@ export default class Node {
       this[INITIALIZED] = false
       switch (error.constructor) {
         case PropagateError:
-          if (this.onPropigateError({ request, error }) !== false) {
+          if (this.onPropagateError({ request, error }) !== false) {
             this.nodes.forEach(node => node.catch({ request, error, stack: error.stack }))
           }
           break
@@ -187,12 +188,12 @@ export default class Node {
           this.onCatch({ request, error, stack: error.stack })
         // do something for standard error
       }
-      console.error(error)
       log(`${this.constructor.name}::error`, '#e6194b', {
         self: this,
         error,
         stack: error.stack,
       })
+      throw error
     }
   }
 
@@ -200,7 +201,7 @@ export default class Node {
     this.log('onCatch', { request, error })
   }
 
-  onPropigateError({ request, error }) {
+  onPropagateError({ request, error }) {
 
   }
   onBubbleError({ request, error }) {
@@ -226,7 +227,7 @@ export default class Node {
     let plugin = this.constructor.plugin
     if (magna.debug && (typeof plugin === 'undefined' || plugin.debug === true)) {
       plugin = plugin || { debug: true, color: '#777' }
-      console.groupCollapsed(`%c%s %c%s`, 'color:#aaa', minimumLetters(10, this[Symbol.toStringTag]), `color: ${plugin.color}`, `${this.constructor.name}::${method}`)
+      console.groupCollapsed(`%c%s %c%s`, 'color:#aaa', pad(10, this[Symbol.toStringTag]), `color: ${plugin.color}`, `${this.constructor.name}::${method}`)
       console.log(this, ...args)
       console.groupEnd()
     }

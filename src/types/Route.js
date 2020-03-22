@@ -1,17 +1,8 @@
-import magna from '@magna'
-import {
-  INITIALIZED,
-  INIT_PROMISE,
-  INIT_DONE,
-  POPSTATE_DONE,
-  POPSTATE_PROMISE
-} from '../symbols'
-import queryString from 'query-string'
-import qs from 'qs'
+import magna from '../magna'
+import qs from 'query-string'
 
-import { log, minimumLetters, trace } from '../utils'
+import { pad, trace } from '../utils'
 import regexify from '../utils/regexify'
-
 import Predicate from './Predicate'
 
 export default class Route extends Predicate {
@@ -47,14 +38,14 @@ export default class Route extends Predicate {
     this.parser = parser
     this.params = params
     this.search = search
-    return trace('createNewRequest')({
+    return {
       ...request,
       params: {
         ...(request.params && request.params),
         ...params
       },
       search
-    })
+    }
   }
 
   runInit({ request }) {
@@ -71,7 +62,7 @@ export default class Route extends Predicate {
     let plugin = this.constructor.plugin
     if (magna.debug && (typeof plugin === 'undefined' || plugin.debug === true)) {
       plugin = plugin || { debug: true, color: '#777' }
-      console.groupCollapsed(`%c%s %c%s`, 'color:#aaa', minimumLetters(10, this[Symbol.toStringTag]), `color: ${plugin.color}`, `${this.constructor.name}::${method}`, this.config.url)
+      console.groupCollapsed(`%c%s %c%s`, 'color:#aaa', pad(10, this[Symbol.toStringTag]), `color: ${plugin.color}`, `${this.constructor.name}::${method}`, this.config.url)
       console.log(this, ...args)
       console.groupEnd()
     }
@@ -79,4 +70,3 @@ export default class Route extends Predicate {
 
 }
 
-export const route = (url, nodes) => new Route(url, nodes)

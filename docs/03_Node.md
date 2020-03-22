@@ -24,10 +24,8 @@ you to write abstracted code, but have it change based on the options provided
 Init is where you can bind all your events to the page, initialize your plugin make any updates to the page
 
 ```javascript
-import magna from 'magna'
+import magna, { Plugin, route } from '@coredna/magna'
 import $ from 'jquery'
-import Plugin from 'magna/Plugin'
-import route from 'magna/route'
 
 class Modal extends Plugin {
   constructor({

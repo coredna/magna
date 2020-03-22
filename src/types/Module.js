@@ -1,5 +1,3 @@
-import { log } from '../utils'
-
 import Node from './Node'
 
 export default class Module extends Node {

@@ -6,7 +6,7 @@ import { INITIALIZED } from '../symbols';
 * Initialize the child nodes when the user fires an event from a page interaction
 *
 * ```
-* import Plugin from '@magna/types/Plugin'
+* import { Plugin, one } from '@carednavmagna'
 * import { one } from '@magna/predicates/one'
 *
 * magna.use([
@@ -16,7 +16,10 @@ import { INITIALIZED } from '../symbols';
 * ])
 * ```
 */
-export default class One extends Node {
+export class One extends Node {
+
+  #target = null
+  #callback = null
 
   constructor(event, target, nodes) {
     super({ event, target }, nodes)
@@ -25,7 +28,10 @@ export default class One extends Node {
   runInit({ request }) {
     this[INITIALIZED] = true
     // don't init the node, bind the event listener
-    this.$target = $(this.config.target).one(this.config.event, (this.__onEvent = e => {
+    this.#target = document.querySelector(this.config.target)
+    this.#target.addEventListener(this.config.event, (this.#callback = e => {
+      // remove the event after it has been fired
+      this.#target.removeEventListener(this.config.event, this.#callback)
       // once the event listener has fired load the node
       super.runInit({ request })
     }))
@@ -33,11 +39,12 @@ export default class One extends Node {
 
   runDestroy({ request }) {
     // unbind the event
-    this.$target.off(this.config.event, this.__onEvent)
+    this.#target.removeEventListener(this.config.event, this.#callback)
     // run destroy
     return super.runDestroy({ request })
   }
+
 }
 
-export const one = (target, event, nodes) =>
+export default (target, event, nodes) =>
   new One(target, event, nodes)

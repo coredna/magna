@@ -1,6 +1,6 @@
 import Node from '../types/Node'
 
-export default class OnlyOnRouteChange extends Node {
+export class OnlyOnRouteChange extends Node {
 
   constructor(pattern, nodes) {
     super(pattern, nodes)
@@ -25,5 +25,5 @@ export default class OnlyOnRouteChange extends Node {
 
 }
 
-export const onlyOnRouteChange = (url, nodes) =>
+export default (url, nodes) =>
   new OnlyOnRouteChange(url, nodes)

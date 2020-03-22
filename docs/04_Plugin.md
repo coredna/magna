@@ -2,9 +2,8 @@
 The `Plugin` class is where you are able to attach functionality to your page.
 
 ```javascript
-import magna from 'magna'
+import magna, { Plugin } from '@coredna/magna'
 import $ from 'jquery'
-import Plugin from 'magna/Plugin'
 
 class MyPlugin extends Plugin {
   init({ request }) {

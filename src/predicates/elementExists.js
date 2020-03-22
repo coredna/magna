@@ -1,6 +1,6 @@
 import Predicate from '../types/Predicate';
 
-class ElementExists extends Predicate {
+export class ElementExists extends Predicate {
 
     [Symbol.toStringTag] = 'ElementExists';
 
@@ -12,4 +12,5 @@ class ElementExists extends Predicate {
     }
 }
 
-export default (selector, nodes) => new ElementExists(selector, nodes)
+export default (selector, nodes) =>
+  new ElementExists(selector, nodes)

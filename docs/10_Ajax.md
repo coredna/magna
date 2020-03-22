@@ -14,7 +14,7 @@ modify it to be used in a single page application with just a minor change.
 
 ```javascript
 import $ from 'jquery'
-import Plugin from 'magna/Plugin'
+import { Plugin } from '@coredna/magna'
 
 class Modal extends Plugin {
   constructor({
@@ -63,8 +63,7 @@ AjaxLink is a plugin that will trigger the popstate workflow throughout your app
  links matching the selector.
  
  ```javascript
-import magna from 'magna'
-import AjaxLink from 'magna/AjaxLink'
+import magna, { AjaxLink } from '@coredna/magna'
 
 magna.init([
   new AjaxLink('.ajax-link')
@@ -84,10 +83,8 @@ requested, once popstate has been fulfilled the `init` method will be called to 
  normal with a http load of your page.
 
 ```javascript
-import magna from 'magna'
+import magna, { AjaxLink, Plugin } from '@coredna/magna'
 import $ from 'jquery'
-import AjaxLink from 'magna/AjaxLink'
-import Plugin from 'magna/Plugin'
 
 class MyAjaxPlugin extends Plugin {
   url = '/index.php'

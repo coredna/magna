@@ -42,9 +42,8 @@ class MyPlugin extends Plugin {
 ```
 
 ```javascript
-import magna from 'magna'
+import magna, { Plugin } from '@coredna/magna'
 import $ from 'jquery'
-import Plugin from 'magna/Plugin'
 
 class MyPlugin extends Plugin {
   constructor(options) {

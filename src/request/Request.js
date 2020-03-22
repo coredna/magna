@@ -1,5 +1,5 @@
 import { combineUrlParams} from '../utils';
-import qs from 'qs'
+import qs from 'query-string'
 
 let prev = null
 export default class Request {
