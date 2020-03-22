@@ -1,6 +1,5 @@
-import magna from '../magna'
-
-export default function logAction(action) {
+export default function logAction(action, instance) {
+  const magna = instance.magna
   if (magna.debug) {
     if (magna.env === 'development') {
       console.group(`%c%s %c%s`, 'color:#aaa', 'action', 'color:teal', action)

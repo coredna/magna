@@ -23,9 +23,10 @@ export default class Import extends Node {
   runInit({ request }) {
     return super.runInit({ request })
       .then(result =>
-        this[INITIALIZED] && this.__promise && this.__promise.then(node =>
-          node.default.runInit({ request })
-        )
+        this[INITIALIZED] && this.__promise && this.__promise.then(node => {
+          node.default.parent = this
+          return node.default.runInit({ request })
+        })
       )
   }
   runPopstate({ request }) {

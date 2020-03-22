@@ -459,8 +459,13 @@ function pad(count, string) {
   return string + _char.repeat(count - string.length > 0 ? count - string.length : 0);
 }
 
+function getRootNode(node) {
+  return node.parent ? getRootNode(node.parent) : node;
+}
+
 var _Symbol$toStringTag;
 var PARENTS = new Map();
+var ROOT = new Map();
 
 var makeId = function (id) {
   return function () {
@@ -531,7 +536,7 @@ var Node = /*#__PURE__*/function () {
       var _this = this;
 
       this.nodes.forEach(function (node) {
-        return node.parent = _this;
+        node.parent = _this;
       });
     }
   }, {
@@ -859,6 +864,11 @@ var Node = /*#__PURE__*/function () {
     },
     set: function set(parent) {
       return PARENTS.set(this, parent);
+    }
+  }, {
+    key: "magna",
+    get: function get() {
+      return ROOT.has(this) ? ROOT.get(this) : ROOT.set(this, getRootNode(this)), ROOT.get(this);
     }
   }]);
 
@@ -1267,7 +1277,9 @@ function debounce(timeout, callback) {
   };
 }
 
-function logAction(action) {
+function logAction(action, instance) {
+  var magna = instance.magna;
+
   if (magna.debug) {
     if (magna.env === 'development') {
       console.group("%c%s %c%s", 'color:#aaa', 'action', 'color:teal', action);
@@ -1277,7 +1289,9 @@ function logAction(action) {
   }
 }
 
-function logRoute(method) {
+function logRoute(method, instance) {
+  var magna = instance.magna;
+
   if (magna.debug) {
     if (magna.env === 'development') {
       console.group("%c%s %c%s %c%s %c%s", 'color:#aaa', 'route', 'color:purple', method, 'color:#111', location.pathname, 'color:#007bff;font-weight:normal', magna.request.type);
@@ -1636,7 +1650,7 @@ var Magna = /*#__PURE__*/function (_Node) {
     _this2.nodes = [];
     _this2.__state = {};
     _this2.__subscribers = new Map();
-    _this2[INITIALIZED] = true;
+    _this2[INITIALIZED] = false;
     _this2.request = new Request({
       type: 'http',
       uuid: STATE_UUID,
@@ -1696,6 +1710,15 @@ var Magna = /*#__PURE__*/function (_Node) {
   }
 
   _createClass(Magna, [{
+    key: "initChildren",
+    value: function initChildren() {
+      var _this3 = this;
+
+      this.nodes.forEach(function (node) {
+        node.parent = _this3;
+      });
+    }
+  }, {
     key: "getHistory",
     value: function getHistory() {
       return states;
@@ -1709,10 +1732,12 @@ var Magna = /*#__PURE__*/function (_Node) {
           env = _ref$env === void 0 ? 'development' : _ref$env,
           _ref$setScrollOnPopst = _ref.setScrollOnPopstate,
           setScrollOnPopstate = _ref$setScrollOnPopst === void 0 ? true : _ref$setScrollOnPopst;
-      logRoute('start');
+      logRoute('start', this);
       this.debug = debug;
       this.env = env;
       this.setScrollOnPopstate = setScrollOnPopstate;
+      this[INITIALIZED] = true;
+      this.initChildren();
       this.runInit({
         request: this.request
       }).then(function (x) {
@@ -1735,7 +1760,7 @@ var Magna = /*#__PURE__*/function (_Node) {
   }, {
     key: "pushState",
     value: function pushState(obj, title, url, params) {
-      var _this3 = this;
+      var _this4 = this;
 
       STATE_UUID++;
       history.replaceState(_objectSpread2({}, history.state, {
@@ -1759,21 +1784,21 @@ var Magna = /*#__PURE__*/function (_Node) {
       this.__setActiveUrl();
 
       states.push(this.request);
-      logRoute('pushState');
+      logRoute('pushState', this);
       return this.runDestroy({
         request: this.request
       }).then(function (destroyResults) {
         console.groupEnd();
-        logRoute('popstate');
-        return _this3.runPopstate({
-          request: _this3.request
+        logRoute('popstate', _this4);
+        return _this4.runPopstate({
+          request: _this4.request
         }).then(function (xs) {
           return console.groupEnd(), xs;
         }).then(function (xs) {
-          return logRoute('init'), xs;
+          return logRoute('init', _this4), xs;
         }).then(function (xs) {
-          return _this3.runInit({
-            request: _this3.request
+          return _this4.runInit({
+            request: _this4.request
           });
         }).then(function (xs) {
           return console.groupEnd(), xs;
@@ -1796,14 +1821,14 @@ var Magna = /*#__PURE__*/function (_Node) {
   }, {
     key: "rerun",
     value: function rerun() {
-      var _this4 = this;
+      var _this5 = this;
 
       this.destroy(this.request).then(function (responses) {
-        _this4.request = new Request(_objectSpread2({
+        _this5.request = new Request(_objectSpread2({
           type: 'manual'
-        }, _this4.request));
+        }, _this5.request));
 
-        _this4.init(_this4.request);
+        _this5.init(_this5.request);
       });
       return this;
     }
@@ -1920,7 +1945,7 @@ var Magna = /*#__PURE__*/function (_Node) {
   }, {
     key: "trigger",
     value: function trigger(path) {
-      var _this5 = this;
+      var _this6 = this;
 
       if (this.__subscribers.has(path)) {
         this.__subscribers.get(path).forEach(function (_ref4) {
@@ -1928,10 +1953,10 @@ var Magna = /*#__PURE__*/function (_Node) {
               instance = _ref4.instance;
 
           if (instance[INITIALIZED]) {
-            cb(_this5.getState());
+            cb(_this6.getState());
             window.dispatchEvent(new CustomEvent(path, {
               detail: {
-                state: _this5.getState(),
+                state: _this6.getState(),
                 instance: instance
               }
             }));
@@ -2005,6 +2030,7 @@ var Import = /*#__PURE__*/function (_Node) {
         request: request
       }).then(function (result) {
         return _this3[INITIALIZED] && _this3.__promise && _this3.__promise.then(function (node) {
+          node["default"].parent = _this3;
           return node["default"].runInit({
             request: request
           });

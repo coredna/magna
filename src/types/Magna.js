@@ -91,6 +91,11 @@ export default class Magna extends Node {
     })
   }
 
+  initChildren() {
+    this.nodes.forEach(node => {
+      node.parent = this
+    })
+  }
   getHistory() {
     return states
   }
@@ -105,6 +110,7 @@ export default class Magna extends Node {
     this.env = env
     this.setScrollOnPopstate = setScrollOnPopstate
     this[INITIALIZED] = true
+    this.initChildren()
     this.runInit({ request: this.request })
       .then(x => (console.groupEnd(), x))
   }

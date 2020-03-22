@@ -11,8 +11,10 @@ import {
 import log from '../utils/log'
 import mergeDeepRight from '../utils/mergeDeepRight'
 import pad from '../utils/pad'
+import getRootNode from '../utils/getRootNode'
 
 const PARENTS = new Map
+const ROOT = new Map
 const makeId = ((id) => () => (id++).toString(16))(16000)
 
 // propagate down
@@ -43,8 +45,11 @@ export default class Node {
 
     this.initChildren()
   }
+  // TODO: add link to root magna node to each child node
   initChildren() {
-    this.nodes.forEach(node => node.parent = this)
+    this.nodes.forEach(node => {
+      node.parent = this
+    })
   }
   init({ request, response }) {
     return this.id
@@ -213,6 +218,12 @@ export default class Node {
   }
   set parent(parent) {
     return PARENTS.set(this, parent)
+  }
+
+  get magna() {
+    return ROOT.has(this)
+      ? ROOT.get(this)
+      : ROOT.set(this, getRootNode(this)), ROOT.get(this)
   }
 
   log(method, message) {
