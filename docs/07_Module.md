@@ -8,7 +8,7 @@ If you needed to run a bunch of plugins for a module eg the Blog module, or a Po
  all the plugins that bring life to your page
 
 ```javascript
-import magna, { Node, Module } from '@coredna/magna'
+import Magna, { Node, Module } from '@coredna/magna'
 
 // create your module class based on the `Module`
 class Catalogue extends Module {
@@ -25,7 +25,7 @@ const catalogue = new Catalogue([
   new Node()
 ])
 
-magna.init([
+new Magna([
   catalogue
-])
+]).start()
 ```

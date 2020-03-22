@@ -1,5 +1,3 @@
-import magna from '../magna'
-
 import {
   INITIALIZED,
   INIT_DONE,
@@ -228,7 +226,7 @@ export default class Node {
 
   log(method, message) {
     let plugin = this.constructor.plugin
-    if (magna.debug && (typeof plugin === 'undefined' || plugin.debug === true)) {
+    if (this.magna.debug && (typeof plugin === 'undefined' || plugin.debug === true)) {
       plugin = plugin || { debug: true, color: '#777' }
       console.log(`%c--> ${this.constructor.name}::${method}`, `color: ${plugin.color||'#000'}`, message, this)
     }
@@ -236,7 +234,7 @@ export default class Node {
 
   info(method, ...args) {
     let plugin = this.constructor.plugin
-    if (magna.debug && (typeof plugin === 'undefined' || plugin.debug === true)) {
+    if (this.magna.debug && (typeof plugin === 'undefined' || plugin.debug === true)) {
       plugin = plugin || { debug: true, color: '#777' }
       console.groupCollapsed(`%c%s %c%s`, 'color:#aaa', pad(10, this[Symbol.toStringTag]), `color: ${plugin.color}`, `${this.constructor.name}::${method}`)
       console.log(this, ...args)
@@ -245,17 +243,17 @@ export default class Node {
   }
 
   setState(path, stateReducer) {
-    magna.setState(path, stateReducer)
-    return magna.getState(path)
+    this.magna.setState(path, stateReducer)
+    return this.magna.getState(path)
   }
 
   subscribe(path, cb) {
-    magna.subscribe(this, path, cb)
+    this.magna.subscribe(this, path, cb)
     return true
   }
 
   unsubscribe(path, cb) {
-    magna.unsubscribe(this, path, cb)
+    this.magna.unsubscribe(this, path, cb)
     return true
   }
 

@@ -29,7 +29,6 @@ export default class Magna extends Node {
   constructor(nodes) {
     super({}, nodes)
 
-    this.nodes = []
     this.__state = {}
     this.__subscribers = new Map()
     this[INITIALIZED] = false

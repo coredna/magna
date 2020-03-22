@@ -798,7 +798,7 @@ var Node = /*#__PURE__*/function () {
     value: function log(method, message) {
       var plugin = this.constructor.plugin;
 
-      if (magna.debug && (typeof plugin === 'undefined' || plugin.debug === true)) {
+      if (this.magna.debug && (typeof plugin === 'undefined' || plugin.debug === true)) {
         plugin = plugin || {
           debug: true,
           color: '#777'
@@ -811,7 +811,7 @@ var Node = /*#__PURE__*/function () {
     value: function info(method) {
       var plugin = this.constructor.plugin;
 
-      if (magna.debug && (typeof plugin === 'undefined' || plugin.debug === true)) {
+      if (this.magna.debug && (typeof plugin === 'undefined' || plugin.debug === true)) {
         var _console;
 
         plugin = plugin || {
@@ -832,19 +832,19 @@ var Node = /*#__PURE__*/function () {
   }, {
     key: "setState",
     value: function setState(path, stateReducer) {
-      magna.setState(path, stateReducer);
-      return magna.getState(path);
+      this.magna.setState(path, stateReducer);
+      return this.magna.getState(path);
     }
   }, {
     key: "subscribe",
     value: function subscribe(path, cb) {
-      magna.subscribe(this, path, cb);
+      this.magna.subscribe(this, path, cb);
       return true;
     }
   }, {
     key: "unsubscribe",
     value: function unsubscribe(path, cb) {
-      magna.unsubscribe(this, path, cb);
+      this.magna.unsubscribe(this, path, cb);
       return true;
     }
   }, {
@@ -1643,7 +1643,6 @@ var Magna = /*#__PURE__*/function (_Node) {
 
     _defineProperty(_assertThisInitialized(_this2), _Symbol$toStringTag$1, 'Magna');
 
-    _this2.nodes = [];
     _this2.__state = {};
     _this2.__subscribers = new Map();
     _this2[INITIALIZED] = false;
@@ -1964,8 +1963,6 @@ var Magna = /*#__PURE__*/function (_Node) {
 
   return Magna;
 }(Node);
-
-var magna = new Magna();
 
 var _Symbol$toStringTag$2;
 _Symbol$toStringTag$2 = Symbol.toStringTag;
@@ -2377,7 +2374,7 @@ var Route = /*#__PURE__*/function (_Predicate) {
     value: function info(method) {
       var plugin = this.constructor.plugin;
 
-      if (magna.debug && (typeof plugin === 'undefined' || plugin.debug === true)) {
+      if (this.magna.debug && (typeof plugin === 'undefined' || plugin.debug === true)) {
         var _console;
 
         plugin = plugin || {
@@ -2651,6 +2648,6 @@ var subscribe = (function (target, event, nodes) {
   return new Subscribe(target, event, nodes);
 });
 
-export default magna;
+export default Magna;
 export { ElementExists, Import, Lazy, Magna, Module, Node, One, OnlyOnRouteChange, Plugin, Predicate, Route, Singleton, Subscribe, combineUrlParams, debounce, elementExists, log, logAction, logRoute, mergeDeepRight, one, onlyOnRouteChange, pad, prettify, radioClass, regexify$1 as regexify, route, subscribe, tap, trace, uglify };
 //# sourceMappingURL=magna.esm.js.map

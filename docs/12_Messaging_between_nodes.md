@@ -42,7 +42,7 @@ class MyPlugin extends Plugin {
 ```
 
 ```javascript
-import magna, { Plugin } from '@coredna/magna'
+import Magna, { Plugin } from '@coredna/magna'
 import $ from 'jquery'
 
 class MyPlugin extends Plugin {
@@ -64,8 +64,8 @@ class MyOtherPlugin extends Plugin {
   }
 }
 
-magna.init([
+new Magna([
   new MyPlugin(),
   new MyOtherPlugin(),
-])
+]).start()
 ```

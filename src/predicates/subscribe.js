@@ -1,5 +1,4 @@
 import Node from '../types/Node'
-import magna from "../magna";
 import { INITIALIZED } from '../symbols'
 
 /*
@@ -9,8 +8,7 @@ import { INITIALIZED } from '../symbols'
 * It will only ever initialize once per lifecycle, which is reset when popstate fires
 *
 * ```
-* import Plugin from '@magna/types/Plugin'
-* import { subscribe } from '@magna/predicates/subscribe'
+* import { Plugin, subscribe } from '@coredna/magna'
 *
 * magna.use([
 *   subscribe('my.custom.event', [

@@ -3,7 +3,7 @@ The `Singleton` is a `Plugin` that will never be destroyed or re-initialized aft
 example plugin will only be bound to your page once, and will never be destroyed if you change the page.
 
 ```javascript
-import magna, { Singleton } from '@coredna/magna'
+import Magna, { Singleton } from '@coredna/magna'
 import $ from 'jquery'
 
 class MySingleton extends Singleton {
@@ -14,7 +14,7 @@ class MySingleton extends Singleton {
     console.log('clicked element', e)
   }
 }
-magna.init([
+new Magna([
   new MySingleton({ selector: '#my-element' }),
-])
+]).start()
 ```

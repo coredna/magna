@@ -13,7 +13,7 @@ manage modules, Magna can improve your code.
 Here is a simple example of what can be achieved using Magna.
 
 ```javascript
-import magna, { route } from '@coredna/magna'
+import Magna, { route } from '@coredna/magna'
 
 import MobileNavigation from './plugins/MobileNavigation'
 
@@ -21,7 +21,7 @@ import HomePage from './page/HomePage'
 import Blog from './blog/Blog'
 import Catalogue from './catalogue/Catalogue'
 
-magna.init(
+new Magna([
   new MobileNavigation(),
   route('/', [
     new HomePage([
@@ -39,7 +39,7 @@ magna.init(
       new FacetedSearch()
     ])
   ])
-)
+]).start()
 ```
 
 Magna makes understanding your code easy at a very high level. In this code I can see that there is some mobile 

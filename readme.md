@@ -8,7 +8,7 @@ npm install @coredna/magna
 
 ## API
 ```javascript
-import magna, { 
+import Magna, { 
   Import, 
   Node, 
   Predicate,
@@ -60,7 +60,8 @@ class ShouldRun extends Predicate {
   }
 }
 
-magna.use([
+// initialize a new instance of Magna
+const magna = new Magna([
   // run plugins globally on every page
   new Foo({}),
   // nest any Node
@@ -97,7 +98,10 @@ magna.use([
     new Foo()
   ])
 ])
-magna.start()
+magna.start({
+  env: 'production',
+  debug: false
+})
 ```
 
 ## Magna
