@@ -14,6 +14,7 @@ import { over } from 'rambda/src/over'
 import { view } from 'rambda/src/view'
 import { equals } from 'rambda/src/equals'
 
+// TODO: move scoped variables to private properties to allow better testing
 const states = []
 let STATE_UUID = 0
 
@@ -31,7 +32,7 @@ export default class Magna extends Node {
     this.nodes = []
     this.__state = {}
     this.__subscribers = new Map()
-    this[INITIALIZED] = true
+    this[INITIALIZED] = false
     this.request = new Request({
       type: 'http',
       uuid: STATE_UUID,
@@ -103,6 +104,7 @@ export default class Magna extends Node {
     this.debug = debug
     this.env = env
     this.setScrollOnPopstate = setScrollOnPopstate
+    this[INITIALIZED] = true
     this.runInit({ request: this.request })
       .then(x => (console.groupEnd(), x))
   }
