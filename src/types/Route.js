@@ -1,4 +1,3 @@
-import magna from '../magna'
 import qs from 'query-string'
 
 import { pad, trace } from '../utils'
@@ -60,7 +59,7 @@ export default class Route extends Predicate {
 
  info(method, ...args) {
     let plugin = this.constructor.plugin
-    if (magna.debug && (typeof plugin === 'undefined' || plugin.debug === true)) {
+    if (this.magna.debug && (typeof plugin === 'undefined' || plugin.debug === true)) {
       plugin = plugin || { debug: true, color: '#777' }
       console.groupCollapsed(`%c%s %c%s`, 'color:#aaa', pad(10, this[Symbol.toStringTag]), `color: ${plugin.color}`, `${this.constructor.name}::${method}`, this.config.url)
       console.log(this, ...args)

@@ -63,11 +63,11 @@ AjaxLink is a plugin that will trigger the popstate workflow throughout your app
  links matching the selector.
  
  ```javascript
-import magna, { AjaxLink } from '@coredna/magna'
+import Magna, { AjaxLink } from '@coredna/magna'
 
-magna.init([
+new Magna([
   new AjaxLink('.ajax-link')
-])
+]).start()
 ```
  
 #### popstatePromise
@@ -83,7 +83,7 @@ requested, once popstate has been fulfilled the `init` method will be called to 
  normal with a http load of your page.
 
 ```javascript
-import magna, { AjaxLink, Plugin } from '@coredna/magna'
+import Magna, { AjaxLink, Plugin } from '@coredna/magna'
 import $ from 'jquery'
 
 class MyAjaxPlugin extends Plugin {
@@ -106,8 +106,8 @@ class MyAjaxPlugin extends Plugin {
      console.log('MyAjaxPlugin::init')
   }
 }
-magna.init([
+new Magna([
   new AjaxLink([ '.ajax-link' ]),
   new MyAjaxPlugin()
-])
+]).start()
 ```

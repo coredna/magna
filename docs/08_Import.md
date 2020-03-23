@@ -9,11 +9,11 @@ loads.
  when our module should be pulled in and will only ever be called once to join the module to the application.
 
 ```javascript
-import magna, { Import, route } from '@coredna/magna'
+import Magna, { Import, route } from '@coredna/magna'
 
-magna.init([
+new Magna([
   route('/catalogue', [
     new Import(() => import('#catalogue'))
   ])
-])
+]).start()
 ```

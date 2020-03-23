@@ -1,6 +1,5 @@
-import magna from '../magna'
-
-export default function logRoute(method) {
+export default function logRoute(method, instance) {
+  const magna = instance.magna
   if (magna.debug) {
     if (magna.env === 'development') {
       console.group(`%c%s %c%s %c%s %c%s`,

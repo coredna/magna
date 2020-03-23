@@ -2,7 +2,7 @@
 The `Plugin` class is where you are able to attach functionality to your page.
 
 ```javascript
-import magna, { Plugin } from '@coredna/magna'
+import Magna, { Plugin } from '@coredna/magna'
 import $ from 'jquery'
 
 class MyPlugin extends Plugin {
@@ -16,7 +16,7 @@ class MyPlugin extends Plugin {
     console.log('clicked element', e)
   }
 }
-magna.init([
+const app = new Magna([
   new MyPlugin({ selector: '#my-element' }),
-])
+]).start()
 ```

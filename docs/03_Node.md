@@ -24,7 +24,7 @@ you to write abstracted code, but have it change based on the options provided
 Init is where you can bind all your events to the page, initialize your plugin make any updates to the page
 
 ```javascript
-import magna, { Plugin, route } from '@coredna/magna'
+import Magna, { Plugin, route } from '@coredna/magna'
 import $ from 'jquery'
 
 class Modal extends Plugin {
@@ -53,7 +53,7 @@ class Modal extends Plugin {
 }
 
 // initialze the application
-magna.init([
+const app = new Magna([
   // use defaults in plugin
   new Modal(),
   // use specific selector for a specific modal
@@ -66,7 +66,7 @@ magna.init([
       selector: '.modal--add-to-cart',
     })
   ])
-])
+]).start()
 ```
 
 This code is very abstract, it allows us to re-use it anywhere in our application that requires a Modal plugin, we 
