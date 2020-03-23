@@ -16,3 +16,10 @@ published framework
 * Add `config` to `init`, `destroy` & `popstate` methods. `init({ request, config })`
 * Update license to correct version [MIT](http://opensource.org/licenses/MIT)
 
+`v2.1.0`
+* Removed global singleton `magna` instance, users need to create their own instance now
+* default export from `@coredna/magna` is now the `Magna` constructor
+* All nodes now have access to their root node through `node.magna`
+* Fixed bug with `Import` not passing itself to child `Module`
+* Added jest for testing
+* Documentation updated with new API
