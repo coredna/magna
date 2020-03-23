@@ -93,6 +93,7 @@ export default class Magna extends Node {
     this.initChildren()
     this.runInit({ request: this.request })
       .then(x => (console.groupEnd(), x))
+    return this
   }
 
   popstate({ request, response }) {

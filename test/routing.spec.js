@@ -34,7 +34,6 @@ describe('Routing', () => {
   })
 
   test('route node active after start', () => {
-    const app = new Magna()
     const mockRequest = new Request({
       type: 'test',
       href: '/test/the-slug',
@@ -42,18 +41,67 @@ describe('Routing', () => {
         one: 1
       }
     })
-    app.use([
+    const app = new Magna([
       route('/test/{slug}', [
         new Node({})
       ])
     ])
-    app.start({
-      env: 'test',
-      debug: false,
-      request: mockRequest,
+      .start({
+        env: 'test',
+        debug: false,
+        request: mockRequest,
+      })
+
+    const routeNodeActive = nodeActiveAt([0, 0])
+    expect(routeNodeActive(app)).toEqual(true)
+  })
+
+})
+
+describe('Request', () => {
+
+  const routingApp = nodes => {
+    const mockRequest = new Request({
+      type: 'test',
+      href: '/test/the-slug?one=1',
+      query: {
+        two: '2'
+      }
     })
 
-    const routeNodeActive = nodeActiveAt([0])
-    expect(routeNodeActive(app)).toEqual(true)
+    return new Magna([
+      route('/test/{slug:string}', [
+        route('/test/{url}', [
+          new Node({}, nodes)
+        ])
+      ])
+    ])
+      .start({
+        env: 'test',
+        debug: false,
+        request: mockRequest,
+      })
+  }
+
+  test('Request combines params from href and query object', () => {
+    class CheckRequestQuery extends Node {
+      init({ request }) {
+        expect(request.query).toEqual({ one: '1', two: '2' })
+      }
+    }
+    routingApp([
+      new CheckRequestQuery({})
+    ])
+  })
+
+  test('Child nodes have parent route params in request', () => {
+    class CheckRequestParams extends Node {
+      init({ request }) {
+        expect(request.params).toEqual({ slug: 'the-slug', url: 'the-slug' })
+      }
+    }
+    routingApp([
+      new CheckRequestParams({})
+    ])
   })
 })

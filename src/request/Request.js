@@ -37,7 +37,7 @@ export default class Request {
       query,
     )
     // stringify the params for use in the application
-    this.search = qs.stringify(this.params, {
+    this.search = qs.stringify(this.query, {
       encode: false,
       arrayFormat: 'brackets'
     })
