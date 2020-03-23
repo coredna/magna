@@ -1,5 +1,5 @@
 /**
- * Magna v2.0.0 (https://github.com/coredna/magna)
+ * Magna v2.1.0 (https://github.com/coredna/magna)
  * Copywrite 2020 Andrew Fountain
  * Released under the MIT license 
  */
@@ -1372,39 +1372,65 @@ var uglify = function uglify(str) {
 
 var prev = null;
 
-var Request = function Request() {
-  var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-      _ref$type = _ref.type,
-      type = _ref$type === void 0 ? 'http' : _ref$type,
-      _ref$uuid = _ref.uuid,
-      uuid = _ref$uuid === void 0 ? 0 : _ref$uuid,
-      _ref$url = _ref.url,
-      url = _ref$url === void 0 ? location.pathname : _ref$url,
-      params = _ref.params,
-      _ref$scrollTop = _ref.scrollTop,
-      scrollTop = _ref$scrollTop === void 0 ? 0 : _ref$scrollTop;
+var createUUid = function (x) {
+  return function () {
+    return x++;
+  };
+}(0);
 
-  _classCallCheck(this, Request);
+var Request = /*#__PURE__*/function () {
+  function Request() {
+    var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+        _ref$type = _ref.type,
+        type = _ref$type === void 0 ? 'http' : _ref$type,
+        _ref$uuid = _ref.uuid,
+        uuid = _ref$uuid === void 0 ? createUUid() : _ref$uuid,
+        _ref$href = _ref.href,
+        href = _ref$href === void 0 ? location.href : _ref$href,
+        _ref$params = _ref.params,
+        params = _ref$params === void 0 ? {} : _ref$params,
+        _ref$scrollTop = _ref.scrollTop,
+        scrollTop = _ref$scrollTop === void 0 ? 0 : _ref$scrollTop,
+        _ref$title = _ref.title,
+        title = _ref$title === void 0 ? document.title : _ref$title;
 
-  _defineProperty(this, "type", 'http');
+    _classCallCheck(this, Request);
 
-  _defineProperty(this, "keywords", []);
+    _defineProperty(this, "type", 'http');
 
-  _defineProperty(this, "params", {});
+    _defineProperty(this, "keywords", []);
 
-  _defineProperty(this, "values", []);
+    _defineProperty(this, "params", {});
 
-  _defineProperty(this, "scrollTop", 0);
+    _defineProperty(this, "values", []);
 
-  this.prev = prev;
-  this.type = type;
-  this.uuid = uuid;
-  this.pathname = url;
-  this.scrollTop = scrollTop;
-  this.params = queryString.parse(location.search.slice(location.search.indexOf('?') + 1));
-  this.href = combineUrlParams(url, params);
-  prev = this.pathname;
-};
+    _defineProperty(this, "scrollTop", 0);
+
+    this.prev = prev;
+    this.type = type;
+    this.uuid = uuid;
+    this.params = mergeDeepRight(queryString.parse(href.slice(href.indexOf('?') + 1)), params);
+    this.search = queryString.stringify(this.params, {
+      encode: false,
+      arrayFormat: 'brackets'
+    });
+    this.pathname = href.slice(0, href.indexOf('?'));
+    this.href = this.pathname + (this.search ? "?".concat(this.search) : '');
+    this.title = title;
+    this.scrollTop = scrollTop;
+    prev = this.pathname;
+  }
+
+  _createClass(Request, [{
+    key: "merge",
+    value: function merge(_ref2) {
+      var params = _ref2.params;
+      this.params = mergeDeepRight(this.params, params);
+    }
+  }]);
+
+  return Request;
+}();
 
 function curry(fn, args = []){
   return (..._args) =>
@@ -1623,8 +1649,6 @@ function equals(a, b){
 }
 
 var _Symbol$toStringTag$1;
-var states = [];
-var STATE_UUID = 0;
 _Symbol$toStringTag$1 = Symbol.toStringTag;
 
 var Magna = /*#__PURE__*/function (_Node) {
@@ -1633,38 +1657,28 @@ var Magna = /*#__PURE__*/function (_Node) {
   var _super = _createSuper(Magna);
 
   function Magna(nodes) {
-    var _this2;
+    var _this;
 
     _classCallCheck(this, Magna);
 
-    _this2 = _super.call(this, {}, nodes);
+    _this = _super.call(this, {}, nodes);
 
-    _defineProperty(_assertThisInitialized(_this2), "debug", true);
+    _defineProperty(_assertThisInitialized(_this), "debug", true);
 
-    _defineProperty(_assertThisInitialized(_this2), "env", 'development');
+    _defineProperty(_assertThisInitialized(_this), "env", 'development');
 
-    _defineProperty(_assertThisInitialized(_this2), "setScrollOnPopstate", true);
+    _defineProperty(_assertThisInitialized(_this), "setScrollOnPopstate", true);
 
-    _defineProperty(_assertThisInitialized(_this2), _Symbol$toStringTag$1, 'Magna');
+    _defineProperty(_assertThisInitialized(_this), _Symbol$toStringTag$1, 'Magna');
 
-    _this2.__state = {};
-    _this2.__subscribers = new Map();
-    _this2[INITIALIZED] = false;
-    _this2.request = new Request({
-      type: 'http',
-      uuid: STATE_UUID,
-      url: location.pathname
-    });
-    states.push(_this2.request);
-    history.replaceState(_objectSpread2({}, history.state, {}, _this2.request, {
-      scrollTop: document.body.scrollTop,
-      index: states.length,
-      prev: location.pathname
+    _this.__state = {};
+    _this.__subscribers = new Map();
+    _this[INITIALIZED] = false;
+    history.replaceState(_objectSpread2({}, history.state, {
+      scrollTop: document.body.scrollTop
     }), document.title);
 
-    var _this = _assertThisInitialized(_this2);
-
-    _this2.__setActiveUrl();
+    _this.__setActiveUrl();
 
     window.addEventListener('popstate', function (e) {
       if (e.state === null) {
@@ -1672,26 +1686,24 @@ var Magna = /*#__PURE__*/function (_Node) {
         return false;
       }
 
-      var request = _this2.request = _objectSpread2({}, e.state, {
-        prev: states[states.length - 1].pathname
-      });
+      var request = _this.request = new Request(e.state);
 
-      _this2.__setActiveUrl();
+      _this.__setActiveUrl();
 
-      logRoute('popstate', _assertThisInitialized(_this2));
-      return _this2.runDestroy({
+      logRoute('popstate', _assertThisInitialized(_this));
+      return _this.runDestroy({
         request: request
       }).then(function (destroyResults) {
         console.groupEnd();
-        logRoute('popstate', _assertThisInitialized(_this2));
-        return _this2.runPopstate({
+        logRoute('popstate', _assertThisInitialized(_this));
+        return _this.runPopstate({
           request: request
         }).then(function (xs) {
           return console.groupEnd(), xs;
         }).then(function (xs) {
-          return logRoute('init', _assertThisInitialized(_this2)), xs;
+          return logRoute('init', _assertThisInitialized(_this)), xs;
         }).then(function (xs) {
-          return _this2.runInit({
+          return _this.runInit({
             request: request
           });
         }).then(function (xs) {
@@ -1705,22 +1717,17 @@ var Magna = /*#__PURE__*/function (_Node) {
         });
       });
     });
-    return _this2;
+    return _this;
   }
 
   _createClass(Magna, [{
     key: "initChildren",
     value: function initChildren() {
-      var _this3 = this;
+      var _this2 = this;
 
       this.nodes.forEach(function (node) {
-        node.parent = _this3;
+        node.parent = _this2;
       });
-    }
-  }, {
-    key: "getHistory",
-    value: function getHistory() {
-      return states;
     }
   }, {
     key: "start",
@@ -1730,12 +1737,15 @@ var Magna = /*#__PURE__*/function (_Node) {
           _ref$env = _ref.env,
           env = _ref$env === void 0 ? 'development' : _ref$env,
           _ref$setScrollOnPopst = _ref.setScrollOnPopstate,
-          setScrollOnPopstate = _ref$setScrollOnPopst === void 0 ? true : _ref$setScrollOnPopst;
+          setScrollOnPopstate = _ref$setScrollOnPopst === void 0 ? true : _ref$setScrollOnPopst,
+          _ref$request = _ref.request,
+          request = _ref$request === void 0 ? null : _ref$request;
       logRoute('start', this);
       this.debug = debug;
       this.env = env;
       this.setScrollOnPopstate = setScrollOnPopstate;
       this[INITIALIZED] = true;
+      this.request = request !== null && request !== void 0 ? request : new Request();
       this.initChildren();
       this.runInit({
         request: this.request
@@ -1758,46 +1768,42 @@ var Magna = /*#__PURE__*/function (_Node) {
     }
   }, {
     key: "pushState",
-    value: function pushState(obj, title, url, params) {
-      var _this4 = this;
-
-      STATE_UUID++;
-      history.replaceState(_objectSpread2({}, history.state, {
-        scrollTop: document.body.scrollTop,
-        index: states.length
-      }), document.title);
-      this.request = new Request(_objectSpread2({
+    value: function pushState(obj, title, href, params) {
+      this.request = new Request({
         type: 'popstate',
-        uuid: STATE_UUID,
-        href: location.pathname,
-        url: url,
+        href: href,
         params: params,
         title: title
-      }, obj));
-      var queryStringParams = queryString.stringify(params, {
-        encode: false,
-        arrayFormat: 'brackets'
       });
-      history.pushState(this.request, this.request.title, url + (queryStringParams ? '?' + queryStringParams : ''));
+      return this.pushStateWithRequest(this.request);
+    }
+  }, {
+    key: "pushStateWithRequest",
+    value: function pushStateWithRequest(request) {
+      var _this3 = this;
+
+      history.replaceState(_objectSpread2({}, history.state, {
+        scrollTop: document.body.scrollTop
+      }), document.title);
+      history.pushState(request, request.title, request.href);
 
       this.__setActiveUrl();
 
-      states.push(this.request);
       logRoute('pushState', this);
       return this.runDestroy({
-        request: this.request
+        request: request
       }).then(function (destroyResults) {
         console.groupEnd();
-        logRoute('popstate', _this4);
-        return _this4.runPopstate({
-          request: _this4.request
+        logRoute('popstate', _this3);
+        return _this3.runPopstate({
+          request: _this3.request
         }).then(function (xs) {
           return console.groupEnd(), xs;
         }).then(function (xs) {
-          return logRoute('init', _this4), xs;
+          return logRoute('init', _this3), xs;
         }).then(function (xs) {
-          return _this4.runInit({
-            request: _this4.request
+          return _this3.runInit({
+            request: _this3.request
           });
         }).then(function (xs) {
           return console.groupEnd(), xs;
@@ -1820,14 +1826,14 @@ var Magna = /*#__PURE__*/function (_Node) {
   }, {
     key: "rerun",
     value: function rerun() {
-      var _this5 = this;
+      var _this4 = this;
 
       this.destroy(this.request).then(function (responses) {
-        _this5.request = new Request(_objectSpread2({
+        _this4.request = new Request(_objectSpread2({
           type: 'manual'
-        }, _this5.request));
+        }, _this4.request));
 
-        _this5.init(_this5.request);
+        _this4.init(_this4.request);
       });
       return this;
     }
@@ -1944,7 +1950,7 @@ var Magna = /*#__PURE__*/function (_Node) {
   }, {
     key: "trigger",
     value: function trigger(path) {
-      var _this6 = this;
+      var _this5 = this;
 
       if (this.__subscribers.has(path)) {
         this.__subscribers.get(path).forEach(function (_ref4) {
@@ -1952,10 +1958,10 @@ var Magna = /*#__PURE__*/function (_Node) {
               instance = _ref4.instance;
 
           if (instance[INITIALIZED]) {
-            cb(_this6.getState());
+            cb(_this5.getState());
             window.dispatchEvent(new CustomEvent(path, {
               detail: {
-                state: _this6.getState(),
+                state: _this5.getState(),
                 instance: instance
               }
             }));
@@ -2338,7 +2344,7 @@ var Route = /*#__PURE__*/function (_Predicate) {
       var request = _ref3.request;
       var parser = regexify$1(this.config.url);
       var params = this.processHref(_objectSpread2({
-        href: location.pathname
+        href: request.pathname
       }, parser));
       var search = queryString.parse(location.search.slice(1), {
         plainObjects: true
@@ -2346,31 +2352,41 @@ var Route = /*#__PURE__*/function (_Predicate) {
       this.parser = parser;
       this.params = params;
       this.search = search;
+      request.params = mergeDeepRight(request.params, params);
       return _objectSpread2({}, request, {
         params: _objectSpread2({}, request.params && request.params, {}, params),
         search: search
       });
     }
   }, {
-    key: "runInit",
-    value: function runInit(_ref4) {
+    key: "decorateRequest",
+    value: function decorateRequest(_ref4) {
       var request = _ref4.request;
-      var newRequest = this.createNewRequest({
-        request: request
-      });
+      this.parser = regexify$1(this.config.url);
+      this.params = this.processHref(_objectSpread2({
+        href: request.pathname
+      }, this.parser));
+      request.params = mergeDeepRight(request.params, this.params);
+      return request;
+    }
+  }, {
+    key: "runInit",
+    value: function runInit(_ref5) {
+      var request = _ref5.request;
       return _get(_getPrototypeOf(Route.prototype), "runInit", this).call(this, {
-        request: newRequest
+        request: this.decorateRequest({
+          request: request
+        })
       });
     }
   }, {
     key: "runPopstate",
-    value: function runPopstate(_ref5) {
-      var request = _ref5.request;
-      var newRequest = this.createNewRequest({
-        request: request
-      });
+    value: function runPopstate(_ref6) {
+      var request = _ref6.request;
       return _get(_getPrototypeOf(Route.prototype), "runPopstate", this).call(this, {
-        request: newRequest
+        request: this.decorateRequest({
+          request: request
+        })
       });
     }
   }, {

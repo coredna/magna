@@ -1,16 +1,12 @@
 import Magna from '../src/types/Magna'
 import Node from '../src/types/Node'
+import {
+  traverseEvery,
+  everyNodeInitialized,
+  everyNodeNotInitialized,
+} from './utils'
 
 import { INITIALIZED } from '../src/symbols'
-
-const traverseEvery = callback => function traverse(node) {
-  return callback(node) && node.nodes.length
-    ? node.nodes.every(traverse)
-    : true
-}
-
-const everyNodeInitialized = traverseEvery(node => node[INITIALIZED])
-const everyNodeNotInitialized = traverseEvery(node => node[INITIALIZED] === false)
 
 describe('Magna instance', () => {
 
