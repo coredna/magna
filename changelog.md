@@ -23,3 +23,10 @@ published framework
 * Fixed bug with `Import` not passing itself to child `Module`
 * Added jest for testing
 * Documentation updated with new API
+
+`v2.1.1`
+* Decoupled request from application so it can be mocked and there is a single source of truth for the current state.
+* Changed Request api to be more consistent with the history api
+* Added `query` property to Request to hold get params from the current request
+* Bugfix: Remove location.origin from href
+* Request testing added

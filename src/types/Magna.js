@@ -14,8 +14,6 @@ import { over } from 'rambda/src/over'
 import { view } from 'rambda/src/view'
 import { equals } from 'rambda/src/equals'
 
-// TODO: move scoped variables to private properties to allow better testing
-
 export default class Magna extends Node {
 
   debug = true
@@ -31,11 +29,6 @@ export default class Magna extends Node {
     this.__subscribers = new Map()
     this[INITIALIZED] = false
 
-    // add the initial request to the current state
-    history.replaceState({
-      ...history.state,
-      scrollTop: document.body.scrollTop,
-    }, document.title)
 
     this.__setActiveUrl()
 
@@ -89,6 +82,14 @@ export default class Magna extends Node {
     this.setScrollOnPopstate = setScrollOnPopstate
     this[INITIALIZED] = true
     this.request = request ?? new Request()
+
+    // add the initial request to the current state
+    history.replaceState({
+      ...history.state,
+      scrollTop: document.body.scrollTop,
+      ...this.request,
+    }, document.title)
+
     logRoute('start', this)
     this.initChildren()
     this.runInit({ request: this.request })
@@ -252,7 +253,7 @@ export default class Magna extends Node {
           // send a signal through the browser event system so it can be subscribed to from anywhere
           window.dispatchEvent(new CustomEvent(path, {
             detail: {
-              state: this.getState(),
+              state: view(lensPath(path), this.getState()),
               instance
             },
           }))

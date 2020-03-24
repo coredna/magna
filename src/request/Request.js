@@ -29,6 +29,9 @@ export default class Request {
     this.prev = prev
     this.type = type
     this.uuid = uuid
+    if (~href.indexOf('http') && location.origin) {
+      href = href.replace(location.origin, '')
+    }
     const index = href.indexOf('?')
     const queryStringParams = index > -1 ? qs.parse(href.slice(index + 1)) : {}
     // create the searchParams from the href and the passed in searchParams

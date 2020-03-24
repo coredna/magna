@@ -1,5 +1,5 @@
 /**
- * Magna v2.1.0 (https://github.com/coredna/magna)
+ * Magna v2.1.1 (https://github.com/coredna/magna)
  * Copywrite 2020 Andrew Fountain
  * Released under the MIT license 
  */
@@ -1387,8 +1387,8 @@ var Request = /*#__PURE__*/function () {
         uuid = _ref$uuid === void 0 ? createUUid() : _ref$uuid,
         _ref$href = _ref.href,
         href = _ref$href === void 0 ? location.href : _ref$href,
-        _ref$params = _ref.params,
-        params = _ref$params === void 0 ? {} : _ref$params,
+        _ref$query = _ref.query,
+        query = _ref$query === void 0 ? {} : _ref$query,
         _ref$scrollTop = _ref.scrollTop,
         scrollTop = _ref$scrollTop === void 0 ? 0 : _ref$scrollTop,
         _ref$title = _ref.title,
@@ -1406,15 +1406,24 @@ var Request = /*#__PURE__*/function () {
 
     _defineProperty(this, "scrollTop", 0);
 
+    _defineProperty(this, "query", {});
+
     this.prev = prev;
     this.type = type;
     this.uuid = uuid;
-    this.params = mergeDeepRight(queryString.parse(href.slice(href.indexOf('?') + 1)), params);
-    this.search = queryString.stringify(this.params, {
+
+    if (~href.indexOf('http') && location.origin) {
+      href = href.replace(location.origin, '');
+    }
+
+    var index = href.indexOf('?');
+    var queryStringParams = index > -1 ? queryString.parse(href.slice(index + 1)) : {};
+    this.query = mergeDeepRight(queryStringParams, query);
+    this.search = queryString.stringify(this.query, {
       encode: false,
       arrayFormat: 'brackets'
     });
-    this.pathname = href.slice(0, href.indexOf('?'));
+    this.pathname = index > -1 ? href.slice(0, index) : href;
     this.href = this.pathname + (this.search ? "?".concat(this.search) : '');
     this.title = title;
     this.scrollTop = scrollTop;
@@ -1422,10 +1431,11 @@ var Request = /*#__PURE__*/function () {
   }
 
   _createClass(Request, [{
-    key: "merge",
-    value: function merge(_ref2) {
+    key: "combineParams",
+    value: function combineParams(_ref2) {
       var params = _ref2.params;
       this.params = mergeDeepRight(this.params, params);
+      return this;
     }
   }]);
 
@@ -1674,9 +1684,6 @@ var Magna = /*#__PURE__*/function (_Node) {
     _this.__state = {};
     _this.__subscribers = new Map();
     _this[INITIALIZED] = false;
-    history.replaceState(_objectSpread2({}, history.state, {
-      scrollTop: document.body.scrollTop
-    }), document.title);
 
     _this.__setActiveUrl();
 
@@ -1740,18 +1747,22 @@ var Magna = /*#__PURE__*/function (_Node) {
           setScrollOnPopstate = _ref$setScrollOnPopst === void 0 ? true : _ref$setScrollOnPopst,
           _ref$request = _ref.request,
           request = _ref$request === void 0 ? null : _ref$request;
-      logRoute('start', this);
       this.debug = debug;
       this.env = env;
       this.setScrollOnPopstate = setScrollOnPopstate;
       this[INITIALIZED] = true;
       this.request = request !== null && request !== void 0 ? request : new Request();
+      history.replaceState(_objectSpread2({}, history.state, {
+        scrollTop: document.body.scrollTop
+      }, this.request), document.title);
+      logRoute('start', this);
       this.initChildren();
       this.runInit({
         request: this.request
       }).then(function (x) {
         return console.groupEnd(), x;
       });
+      return this;
     }
   }, {
     key: "popstate",
@@ -1961,7 +1972,7 @@ var Magna = /*#__PURE__*/function (_Node) {
             cb(_this5.getState());
             window.dispatchEvent(new CustomEvent(path, {
               detail: {
-                state: _this5.getState(),
+                state: view(lensPath(path), _this5.getState()),
                 instance: instance
               }
             }));
@@ -2323,7 +2334,7 @@ var Route = /*#__PURE__*/function (_Predicate) {
     key: "predicate",
     value: function predicate(_ref) {
       var request = _ref.request;
-      return this.parser.regex.test(location.pathname);
+      return this.parser.regex.test(request.pathname);
     }
   }, {
     key: "processHref",
@@ -2366,7 +2377,9 @@ var Route = /*#__PURE__*/function (_Predicate) {
       this.params = this.processHref(_objectSpread2({
         href: request.pathname
       }, this.parser));
-      request.params = mergeDeepRight(request.params, this.params);
+      request.combineParams({
+        params: this.params
+      });
       return request;
     }
   }, {
