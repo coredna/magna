@@ -14,10 +14,6 @@ import { over } from 'rambda/src/over'
 import { view } from 'rambda/src/view'
 import { equals } from 'rambda/src/equals'
 
-// TODO: move scoped variables to private properties to allow better testing
-const states = []
-let STATE_UUID = 0
-
 export default class Magna extends Node {
 
   debug = true
@@ -26,43 +22,26 @@ export default class Magna extends Node {
 
   [Symbol.toStringTag] = 'Magna';
 
+  // todo add destroy method to unbind all events and remove all state
+
   constructor(nodes) {
     super({}, nodes)
 
     this.__state = {}
     this.__subscribers = new Map()
     this[INITIALIZED] = false
-    this.request = new Request({
-      type: 'http',
-      uuid: STATE_UUID,
-      url: location.pathname
-    })
-    states.push(this.request)
 
-    // add the initial request to the current state
-    history.replaceState({
-      ...history.state,
-      ...this.request,
-      scrollTop: document.body.scrollTop,
-      index: states.length,
-      prev: location.pathname,
-    }, document.title)
-
-
-    const _this = this
 
     this.__setActiveUrl()
 
+    // TODO: popstate will cause problems with multiple instances of Magna, need to move it out
     window.addEventListener('popstate', e => {
       if(e.state === null) {
          e.preventDefault();
          return false;
       }
 
-      const request = this.request = {
-        ...e.state,
-        prev: states[states.length - 1].pathname
-      }
+      const request = this.request = new Request(e.state)
 
       this.__setActiveUrl()
       // set the previous requests scrollTop position before setting the new Request
@@ -70,7 +49,6 @@ export default class Magna extends Node {
 
       return this.runDestroy({ request })
         .then(destroyResults => {
-          // const newRequest = new Request('popstate')
           console.groupEnd()
           logRoute('popstate', this)
           return this.runPopstate({ request })
@@ -95,23 +73,31 @@ export default class Magna extends Node {
       node.parent = this
     })
   }
-  getHistory() {
-    return states
-  }
 
   start({
     debug = false,
     env = 'development',
     setScrollOnPopstate = true,
+    request = null, // allow passing a request object for testing purposes
   }) {
-    logRoute('start', this)
     this.debug = debug
     this.env = env
     this.setScrollOnPopstate = setScrollOnPopstate
     this[INITIALIZED] = true
+    this.request = request ?? new Request()
+
+    // add the initial request to the current state
+    history.replaceState({
+      ...history.state,
+      scrollTop: document.body.scrollTop,
+      ...this.request,
+    }, document.title)
+
+    logRoute('start', this)
     this.initChildren()
     this.runInit({ request: this.request })
       .then(x => (console.groupEnd(), x))
+    return this
   }
 
   popstate({ request, response }) {
@@ -126,34 +112,32 @@ export default class Magna extends Node {
     return Promise.resolve()
   }
 
-  pushState(obj, title, url, params) {
-    STATE_UUID++
-    // update the scrollTop of the current history entry
+
+  pushState(obj, title, href, params) {
+    this.request = new Request({
+      type: 'popstate',
+      href,
+      params,
+      title,
+    })
+    return this.pushStateWithRequest(this.request)
+  }
+
+  pushStateWithRequest(request) {
+    // update the scrollTop of the entry about to be replaced
     history.replaceState({
       ...history.state,
       scrollTop: document.body.scrollTop,
-      index: states.length
     }, document.title)
 
-    this.request = new Request({
-      type: 'popstate',
-      uuid: STATE_UUID,
-      href: location.pathname,
-      url,
-      params,
-      title,
-      ...obj,
-    })
-    const queryStringParams = qs.stringify(params, {
-      encode: false,
-      arrayFormat: 'brackets',
-    })
-    history.pushState(this.request, this.request.title, url + (queryStringParams ? '?' + queryStringParams : ''))
+    // push the new state with the native browser api
+    history.pushState(request, request.title, request.href)
+
     this.__setActiveUrl()
-    states.push(this.request)
+
     // set the previous requests scrollTop position before setting the new Request
     logRoute('pushState', this)
-    return this.runDestroy({ request: this.request })
+    return this.runDestroy({ request })
       .then(destroyResults => {
         // const newRequest = new Request('popstate')
         console.groupEnd()
@@ -183,7 +167,9 @@ export default class Magna extends Node {
   rerun() {
     this.destroy(this.request)
       .then((responses) => {
-        this.request = new Request({ type: 'manual', ...this.request })
+        this.request = new Request({
+          type: 'manual', ...this.request
+        })
         this.init(this.request)
       })
     return this
@@ -270,7 +256,7 @@ export default class Magna extends Node {
           // send a signal through the browser event system so it can be subscribed to from anywhere
           window.dispatchEvent(new CustomEvent(path, {
             detail: {
-              state: this.getState(),
+              state: view(lensPath(path), this.getState()),
               instance
             },
           }))
