@@ -6,6 +6,22 @@
 var magna = (function (exports) {
   'use strict';
 
+  function _typeof(obj) {
+    "@babel/helpers - typeof";
+
+    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
+      _typeof = function (obj) {
+        return typeof obj;
+      };
+    } else {
+      _typeof = function (obj) {
+        return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+      };
+    }
+
+    return _typeof(obj);
+  }
+
   function _classCallCheck(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
@@ -402,6 +418,14 @@ var magna = (function (exports) {
     }
 
     return value;
+  }
+
+  function _classPrivateMethodGet(receiver, privateSet, fn) {
+    if (!privateSet.has(receiver)) {
+      throw new TypeError("attempted to get private field on non-instance");
+    }
+
+    return fn;
   }
 
   var INITIALIZED = Symbol('INITIALIZED');
@@ -873,6 +897,432 @@ var magna = (function (exports) {
 
     return Node;
   }();
+
+  function path(list, obj){
+    if (arguments.length === 1) return _obj => path(list, _obj)
+    if (obj === null || obj === undefined){
+      return undefined
+    }
+    let willReturn = obj;
+    let counter = 0;
+    const pathArrValue = typeof list === 'string' ? list.split('.') : list;
+    while (counter < pathArrValue.length){
+      if (willReturn === null || willReturn === undefined){
+        return undefined
+      }
+      willReturn = willReturn[ pathArrValue[ counter ] ];
+      counter++;
+    }
+    return willReturn
+  }
+
+  function always(x){
+    return () => x
+  }
+
+  function clone(val){
+    const out = Array.isArray(val) ? Array(val.length) : {};
+    if (val && val.getTime) return new Date(val.getTime())
+    for (const key in val){
+      const v = val[ key ];
+      out[ key ] =
+        typeof v === 'object' && v !== null ?
+          v.getTime ?
+            new Date(v.getTime()) :
+            clone(v) :
+          v;
+    }
+    return out
+  }
+
+  function type(input){
+    const typeOf = typeof input;
+    if (input === null){
+      return 'Null'
+    } else if (input === undefined){
+      return 'Undefined'
+    } else if (typeOf === 'boolean'){
+      return 'Boolean'
+    } else if (typeOf === 'number'){
+      return Number.isNaN(input) ? 'NaN' : 'Number'
+    } else if (typeOf === 'string'){
+      return 'String'
+    } else if (Array.isArray(input)){
+      return 'Array'
+    } else if (input instanceof RegExp){
+      return 'RegExp'
+    }
+    const asStr = input && input.toString ? input.toString() : '';
+    if ([ 'true', 'false' ].includes(asStr)) return 'Boolean'
+    if (!Number.isNaN(Number(asStr))) return 'Number'
+    if (asStr.startsWith('async')) return 'Async'
+    if (asStr === '[object Promise]') return 'Promise'
+    if (typeOf === 'function') return 'Function'
+    if (input instanceof String) return 'String'
+    return 'Object'
+  }
+
+  function parseError(maybeError){
+    const typeofError = maybeError.__proto__.toString();
+    if (![ 'Error', 'TypeError' ].includes(typeofError)) return []
+    return [ typeofError, maybeError.message ]
+  }
+  function parseDate(maybeDate){
+    if (!maybeDate.toDateString) return [ false ]
+    return [ true, maybeDate.getTime() ]
+  }
+  function parseRegex(maybeRegex){
+    if (maybeRegex.constructor !== RegExp) return [ false ]
+    return [ true, maybeRegex.toString() ]
+  }
+  function equals(a, b){
+    if (arguments.length === 1) return _b => equals(a, _b)
+    const aType = type(a);
+    if (aType !== type(b)) return false
+    if ([ 'NaN', 'Undefined', 'Null' ].includes(aType)) return true
+    if ([ 'Boolean', 'Number', 'String' ].includes(aType)) return a.toString() === b.toString()
+    if (aType === 'Array'){
+      const aClone = Array.from(a);
+      const bClone = Array.from(b);
+      if (aClone.toString() !== bClone.toString()){
+        return false
+      }
+      let loopArrayFlag = true;
+      aClone.forEach((aCloneInstance, aCloneIndex) => {
+        if (loopArrayFlag){
+          if (
+            aCloneInstance !== bClone[ aCloneIndex ] &&
+            !equals(aCloneInstance, bClone[ aCloneIndex ])
+          ){
+            loopArrayFlag = false;
+          }
+        }
+      });
+      return loopArrayFlag
+    }
+    const aRegex = parseRegex(a);
+    const bRegex = parseRegex(b);
+    if (aRegex[ 0 ]){
+      return bRegex[ 0 ] ? aRegex[ 1 ] === bRegex[ 1 ] : false
+    } else if (bRegex[ 0 ]) return false
+    const aDate = parseDate(a);
+    const bDate = parseDate(b);
+    if (aDate[ 0 ]){
+      return bDate[ 0 ] ? aDate[ 1 ] === bDate[ 1 ] : false
+    } else if (bDate[ 0 ]) return false
+    const aError = parseError(a);
+    const bError = parseError(b);
+    if (
+      aError[ 0 ]
+    ){
+      return bError[ 0 ] ?
+        aError[ 0 ] === bError[ 0 ] && aError[ 1 ] === bError[ 1 ] :
+        false
+    }
+    if (aType === 'Object'){
+      const aKeys = Object.keys(a);
+      if (aKeys.length !== Object.keys(b).length){
+        return false
+      }
+      let loopObjectFlag = true;
+      aKeys.forEach(aKeyInstance => {
+        if (loopObjectFlag){
+          const aValue = a[ aKeyInstance ];
+          const bValue = b[ aKeyInstance ];
+          if (aValue !== bValue && !equals(aValue, bValue)){
+            loopObjectFlag = false;
+          }
+        }
+      });
+      return loopObjectFlag
+    }
+    return false
+  }
+
+  function curry(fn, args = []){
+    return (..._args) =>
+      (rest => rest.length >= fn.length ? fn(...rest) : curry(fn, rest))([
+        ...args,
+        ..._args,
+      ])
+  }
+
+  function assocFn(
+    prop, val, obj
+  ){
+    return Object.assign(
+      {}, obj, { [ prop ] : val }
+    )
+  }
+  const assoc = curry(assocFn);
+
+  function _isInteger(n){
+    return n << 0 === n
+  }
+
+  function assocPathFn(
+    list, val, input
+  ){
+    const pathArrValue = typeof list === 'string' ? list.split('.') : list;
+    if (pathArrValue.length === 0){
+      return val
+    }
+    const index = pathArrValue[ 0 ];
+    if (pathArrValue.length > 1){
+      const condition = typeof input !== 'object' ||
+        input === null ||
+        !input.hasOwnProperty(index);
+      const nextinput = condition ?
+        _isInteger(parseInt(pathArrValue[ 1 ], 10)) ? [] : {} :
+        input[ index ];
+      val = assocPathFn(
+        Array.prototype.slice.call(pathArrValue, 1), val, nextinput
+      );
+    }
+    if (_isInteger(parseInt(index, 10)) && Array.isArray(input)){
+      const arr = input.slice();
+      arr[ index ] = val;
+      return arr
+    }
+    return assoc(
+      index, val, input
+    )
+  }
+  const assocPath = curry(assocPathFn);
+
+  function lens(getter, setter){
+    if (arguments.length === 1)
+      return _setter => lens(getter, _setter)
+    return function(functor){
+      return function(target){
+        return functor(getter(target))
+          .map(focus => setter(focus, target))
+      }
+    }
+  }
+
+  function lensPath(key){
+    return lens(path(key), assocPath(key))
+  }
+
+  const Identity = x => ({
+    x,
+    map : fn => Identity(fn(x)),
+  });
+  function over(
+    lens, fn, object
+  ){
+    if (arguments.length === 1)
+      return (_fn, _object) => over(
+        lens, _fn, _object
+      )
+    if (arguments.length === 2)
+      return _object => over(
+        lens, fn, _object
+      )
+    return lens(x => Identity(fn(x)))(object).x
+  }
+
+  const Const = x => ({
+    x,
+    map : fn => Const(x),
+  });
+  function view(lens, target){
+    if (arguments.length === 1)
+      return _target => view(lens, _target)
+    return lens(Const)(target).x
+  }
+
+  function escapeRegexCharacters(string) {
+    return string.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+  }
+
+  var StateObserver = function StateObserver(target) {
+    _classCallCheck(this, StateObserver);
+
+    Object.setPrototypeOf(this, new Proxy(target, StateObserver.handler));
+  };
+
+  _defineProperty(StateObserver, "handler", {
+    get: function get(obj, prop, receiver) {
+      if (typeof obj[prop] === 'function') {
+        return function proxied() {
+          for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+            args[_key] = arguments[_key];
+          }
+
+          return obj[prop].apply(obj, args);
+        };
+      }
+
+      if (_typeof(obj[prop]) === 'object' && typeof obj[prop] !== 'undefined') {
+        return new StateObserver(obj[prop], StateObserver.handler);
+      }
+
+      return obj.get(prop);
+    },
+    set: function set(obj, prop, val) {
+      return obj.set(prop, val);
+    }
+  });
+
+  var State = /*#__PURE__*/function () {
+    function State(state) {
+      _classCallCheck(this, State);
+
+      _triggerSubscribers.add(this);
+
+      _defineProperty(this, "__subscribers", new Map());
+
+      _defineProperty(this, "__state", {});
+
+      this.__state = state;
+      return new StateObserver(this);
+    }
+
+    _createClass(State, [{
+      key: "get",
+      value: function get(prop) {
+        return this.__state[prop];
+      }
+    }, {
+      key: "unsafeReplaceState",
+      value: function unsafeReplaceState(newState) {
+        var oldState = this.__state;
+        this.__state = newState;
+
+        _classPrivateMethodGet(this, _triggerSubscribers, _triggerSubscribers2).call(this, oldState, this.__state);
+
+        return newState;
+      }
+    }, {
+      key: "set",
+      value: function set(prop, val) {
+        return this.setState(prop, always(val));
+      }
+    }, {
+      key: "setState",
+      value: function setState(path, stateUpdater) {
+        path = Array.isArray(path) ? path.join('.') : path;
+        var oldState = this.__state;
+        var lens = lensPath(path);
+        this.__state = over(lens, stateUpdater, this.__state);
+
+        _classPrivateMethodGet(this, _triggerSubscribers, _triggerSubscribers2).call(this, oldState, this.__state);
+
+        return view(lens, this.__state);
+      }
+    }, {
+      key: "subscribe",
+      value: function subscribe(path, cb) {
+        path = Array.isArray(path) ? path.join('.') : path;
+
+        if (!this.__subscribers.has(path)) {
+          this.__subscribers.set(path, new Set([]));
+        }
+
+        this.__subscribers.get(path).add(cb);
+      }
+    }, {
+      key: "unsubscribe",
+      value: function unsubscribe(path, cb) {
+        path = Array.isArray(path) ? path.join('.') : path;
+        if (this.__subscribers.has(prop)) this.__subscribers.get(prop)["delete"](cb);
+      }
+    }, {
+      key: "trigger",
+      value: function trigger(path) {
+        var _this = this;
+
+        if (path) {
+          _toConsumableArray(this.__subscribers.entries()).filter(function (_ref) {
+            var _ref2 = _slicedToArray(_ref, 2),
+                key = _ref2[0],
+                value = _ref2[1];
+
+            return new RegExp("^" + escapeRegexCharacters(key), 'gmi').test(key);
+          }).forEach(function (_ref3) {
+            var _ref4 = _slicedToArray(_ref3, 2),
+                key = _ref4[0],
+                cb = _ref4[1];
+
+            var currentView = view(lensPath(key), _this.__state);
+            var currentState = clone(_this.__state);
+            cb(currentView, currentView, currentState, currentState);
+          });
+        } else {
+          _classPrivateMethodGet(this, _triggerSubscribers, _triggerSubscribers2).call(this, {}, this.__state);
+        }
+      }
+    }, {
+      key: "getState",
+      value: function getState() {
+        return clone(this.__state);
+      }
+    }, {
+      key: "getSubscribers",
+      value: function getSubscribers() {
+        return new Map(_toConsumableArray(this.__subscribers.entries()).map(function (_ref5) {
+          var _ref6 = _slicedToArray(_ref5, 2),
+              key = _ref6[0],
+              value = _ref6[1];
+
+          return [key, new Set(value)];
+        }));
+      }
+    }, {
+      key: "unsafeGetState",
+      value: function unsafeGetState() {
+        return this.__state;
+      }
+    }, {
+      key: "unsafeGetSubscribers",
+      value: function unsafeGetSubscribers() {
+        return this.__subscribers;
+      }
+    }, {
+      key: "destroy",
+      value: function destroy() {
+        this.__subscribers = new Map();
+        this.__state = {};
+      }
+    }]);
+
+    return State;
+  }();
+
+  var _triggerSubscribers = new WeakSet();
+
+  var _triggerSubscribers2 = function _triggerSubscribers2(oldState, newState) {
+    var _iterator = _createForOfIteratorHelper(this.__subscribers),
+        _step;
+
+    try {
+      var _loop = function _loop() {
+        var _step$value = _slicedToArray(_step.value, 2),
+            subscribePath = _step$value[0],
+            subscribers = _step$value[1];
+
+        var subscribeLens = lensPath(subscribePath);
+        var oldView = view(subscribeLens, oldState);
+        var newView = view(subscribeLens, newState);
+
+        if (!equals(oldView, newView)) {
+          subscribers.forEach(function (cb) {
+            if (cb.length === 3) cb(newView, oldView, clone(newState));else if (cb.length === 4) cb(newView, oldView, clone(newState), clone(oldState));else cb(newView, oldView);
+          });
+        }
+      };
+
+      for (_iterator.s(); !(_step = _iterator.n()).done;) {
+        _loop();
+      }
+    } catch (err) {
+      _iterator.e(err);
+    } finally {
+      _iterator.f();
+    }
+  };
 
   function createCommonjsModule(fn, module) {
   	return module = { exports: {} }, fn(module, module.exports), module.exports;
@@ -1441,222 +1891,6 @@ var magna = (function (exports) {
     return Request;
   }();
 
-  function curry(fn, args = []){
-    return (..._args) =>
-      (rest => rest.length >= fn.length ? fn(...rest) : curry(fn, rest))([
-        ...args,
-        ..._args,
-      ])
-  }
-
-  function assocFn(
-    prop, val, obj
-  ){
-    return Object.assign(
-      {}, obj, { [ prop ] : val }
-    )
-  }
-  const assoc = curry(assocFn);
-
-  function _isInteger(n){
-    return n << 0 === n
-  }
-
-  function assocPathFn(
-    list, val, input
-  ){
-    const pathArrValue = typeof list === 'string' ? list.split('.') : list;
-    if (pathArrValue.length === 0){
-      return val
-    }
-    const index = pathArrValue[ 0 ];
-    if (pathArrValue.length > 1){
-      const condition = typeof input !== 'object' ||
-        input === null ||
-        !input.hasOwnProperty(index);
-      const nextinput = condition ?
-        _isInteger(parseInt(pathArrValue[ 1 ], 10)) ? [] : {} :
-        input[ index ];
-      val = assocPathFn(
-        Array.prototype.slice.call(pathArrValue, 1), val, nextinput
-      );
-    }
-    if (_isInteger(parseInt(index, 10)) && Array.isArray(input)){
-      const arr = input.slice();
-      arr[ index ] = val;
-      return arr
-    }
-    return assoc(
-      index, val, input
-    )
-  }
-  const assocPath = curry(assocPathFn);
-
-  function lens(getter, setter){
-    if (arguments.length === 1)
-      return _setter => lens(getter, _setter)
-    return function(functor){
-      return function(target){
-        return functor(getter(target))
-          .map(focus => setter(focus, target))
-      }
-    }
-  }
-
-  function path(list, obj){
-    if (arguments.length === 1) return _obj => path(list, _obj)
-    if (obj === null || obj === undefined){
-      return undefined
-    }
-    let willReturn = obj;
-    let counter = 0;
-    const pathArrValue = typeof list === 'string' ? list.split('.') : list;
-    while (counter < pathArrValue.length){
-      if (willReturn === null || willReturn === undefined){
-        return undefined
-      }
-      willReturn = willReturn[ pathArrValue[ counter ] ];
-      counter++;
-    }
-    return willReturn
-  }
-
-  function lensPath(key){
-    return lens(path(key), assocPath(key))
-  }
-
-  const Identity = x => ({
-    x,
-    map : fn => Identity(fn(x)),
-  });
-  function over(
-    lens, fn, object
-  ){
-    if (arguments.length === 1)
-      return (_fn, _object) => over(
-        lens, _fn, _object
-      )
-    if (arguments.length === 2)
-      return _object => over(
-        lens, fn, _object
-      )
-    return lens(x => Identity(fn(x)))(object).x
-  }
-
-  const Const = x => ({
-    x,
-    map : fn => Const(x),
-  });
-  function view(lens, target){
-    if (arguments.length === 1)
-      return _target => view(lens, _target)
-    return lens(Const)(target).x
-  }
-
-  function type(input){
-    const typeOf = typeof input;
-    if (input === null){
-      return 'Null'
-    } else if (input === undefined){
-      return 'Undefined'
-    } else if (typeOf === 'boolean'){
-      return 'Boolean'
-    } else if (typeOf === 'number'){
-      return Number.isNaN(input) ? 'NaN' : 'Number'
-    } else if (typeOf === 'string'){
-      return 'String'
-    } else if (Array.isArray(input)){
-      return 'Array'
-    } else if (input instanceof RegExp){
-      return 'RegExp'
-    }
-    const asStr = input && input.toString ? input.toString() : '';
-    if ([ 'true', 'false' ].includes(asStr)) return 'Boolean'
-    if (!Number.isNaN(Number(asStr))) return 'Number'
-    if (asStr.startsWith('async')) return 'Async'
-    if (asStr === '[object Promise]') return 'Promise'
-    if (typeOf === 'function') return 'Function'
-    if (input instanceof String) return 'String'
-    return 'Object'
-  }
-
-  function parseError(maybeError){
-    const typeofError = maybeError.__proto__.toString();
-    if (![ 'Error', 'TypeError' ].includes(typeofError)) return []
-    return [ typeofError, maybeError.message ]
-  }
-  function parseDate(maybeDate){
-    if (!maybeDate.toDateString) return [ false ]
-    return [ true, maybeDate.getTime() ]
-  }
-  function parseRegex(maybeRegex){
-    if (maybeRegex.constructor !== RegExp) return [ false ]
-    return [ true, maybeRegex.toString() ]
-  }
-  function equals(a, b){
-    if (arguments.length === 1) return _b => equals(a, _b)
-    const aType = type(a);
-    if (aType !== type(b)) return false
-    if ([ 'NaN', 'Undefined', 'Null' ].includes(aType)) return true
-    if ([ 'Boolean', 'Number', 'String' ].includes(aType)) return a.toString() === b.toString()
-    if (aType === 'Array'){
-      const aClone = Array.from(a);
-      const bClone = Array.from(b);
-      if (aClone.toString() !== bClone.toString()){
-        return false
-      }
-      let loopArrayFlag = true;
-      aClone.forEach((aCloneInstance, aCloneIndex) => {
-        if (loopArrayFlag){
-          if (
-            aCloneInstance !== bClone[ aCloneIndex ] &&
-            !equals(aCloneInstance, bClone[ aCloneIndex ])
-          ){
-            loopArrayFlag = false;
-          }
-        }
-      });
-      return loopArrayFlag
-    }
-    const aRegex = parseRegex(a);
-    const bRegex = parseRegex(b);
-    if (aRegex[ 0 ]){
-      return bRegex[ 0 ] ? aRegex[ 1 ] === bRegex[ 1 ] : false
-    } else if (bRegex[ 0 ]) return false
-    const aDate = parseDate(a);
-    const bDate = parseDate(b);
-    if (aDate[ 0 ]){
-      return bDate[ 0 ] ? aDate[ 1 ] === bDate[ 1 ] : false
-    } else if (bDate[ 0 ]) return false
-    const aError = parseError(a);
-    const bError = parseError(b);
-    if (
-      aError[ 0 ]
-    ){
-      return bError[ 0 ] ?
-        aError[ 0 ] === bError[ 0 ] && aError[ 1 ] === bError[ 1 ] :
-        false
-    }
-    if (aType === 'Object'){
-      const aKeys = Object.keys(a);
-      if (aKeys.length !== Object.keys(b).length){
-        return false
-      }
-      let loopObjectFlag = true;
-      aKeys.forEach(aKeyInstance => {
-        if (loopObjectFlag){
-          const aValue = a[ aKeyInstance ];
-          const bValue = b[ aKeyInstance ];
-          if (aValue !== bValue && !equals(aValue, bValue)){
-            loopObjectFlag = false;
-          }
-        }
-      });
-      return loopObjectFlag
-    }
-    return false
-  }
-
   var _Symbol$toStringTag$1;
   _Symbol$toStringTag$1 = Symbol.toStringTag;
 
@@ -1746,6 +1980,7 @@ var magna = (function (exports) {
             setScrollOnPopstate = _ref$setScrollOnPopst === void 0 ? true : _ref$setScrollOnPopst,
             _ref$request = _ref.request,
             request = _ref$request === void 0 ? null : _ref$request;
+        console.warn('test');
         this.debug = debug;
         this.env = env;
         this.setScrollOnPopstate = setScrollOnPopstate;
@@ -2680,6 +2915,8 @@ var magna = (function (exports) {
     return new Subscribe(target, event, nodes);
   });
 
+  console.log('test!!!!!!');
+
   exports.ElementExists = ElementExists;
   exports.Import = Import;
   exports.Lazy = Lazy;
@@ -2692,6 +2929,7 @@ var magna = (function (exports) {
   exports.Predicate = Predicate;
   exports.Route = Route;
   exports.Singleton = Singleton;
+  exports.State = State;
   exports.Subscribe = Subscribe;
   exports.combineUrlParams = combineUrlParams;
   exports.debounce = debounce;

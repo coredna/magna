@@ -1,3 +1,4 @@
+export { default as State } from './State'
 export { default as combineUrlParams } from './combineUrlParams'
 export { default as debounce } from './debounce'
 export { default as log } from './log'

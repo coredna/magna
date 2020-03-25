@@ -31,3 +31,6 @@ published framework
 * Bugfix: Remove location.origin from href
 * Request testing added
 * Removed `Magna.getHistory`, removed scoped state
+
+`v2.1.2`
+* Added new `Observer` class for Node local state management

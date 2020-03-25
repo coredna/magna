@@ -80,6 +80,7 @@ export default class Magna extends Node {
     setScrollOnPopstate = true,
     request = null, // allow passing a request object for testing purposes
   }) {
+    console.warn('test')
     this.debug = debug
     this.env = env
     this.setScrollOnPopstate = setScrollOnPopstate
