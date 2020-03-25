@@ -32,5 +32,6 @@ published framework
 * Request testing added
 * Removed `Magna.getHistory`, removed scoped state
 
-`v2.1.2`
-* Added new `Observer` class for Node local state management
+`v2.2.0`
+* Added new `State` and `StateObserver` classes for managing local state 
+* Added `escapeRegexCharacters`
