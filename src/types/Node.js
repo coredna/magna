@@ -228,7 +228,7 @@ export default class Node {
     let plugin = this.constructor.plugin
     if (this.magna.debug && (typeof plugin === 'undefined' || plugin.debug === true)) {
       plugin = plugin || { debug: true, color: '#777' }
-      console.log(`%c--> ${this.constructor.name}::${method}`, `color: ${plugin.color||'#000'}`, message, this)
+      console.log(`%c--> ${this[Symbol.toStringTag]}::${method}`, `color: ${plugin.color||'#000'}`, message, this)
     }
   }
 
@@ -236,7 +236,7 @@ export default class Node {
     let plugin = this.constructor.plugin
     if (this.magna.debug && (typeof plugin === 'undefined' || plugin.debug === true)) {
       plugin = plugin || { debug: true, color: '#777' }
-      console.groupCollapsed(`%c%s %c%s`, 'color:#aaa', pad(10, this[Symbol.toStringTag]), `color: ${plugin.color}`, `${this.constructor.name}::${method}`)
+      console.groupCollapsed(`%c%s %c%s`, 'color:#aaa', pad(10, this[Symbol.toStringTag]), `color: ${plugin.color}`, `${this[Symbol.toStringTag] || this.constructor.name}::${method}`)
       console.log(this, ...args)
       console.groupEnd()
     }

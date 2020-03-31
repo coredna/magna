@@ -35,3 +35,7 @@ published framework
 `v2.2.0`
 * Added new `State` and `StateObserver` classes for managing local state 
 * Added `escapeRegexCharacters`
+
+`v2.3.0`
+* Added new Node `ExtendablePlugin` see [ExtendablePlugin](./docs/13_ExtendablePlugin.md)
+* Changed developer console log to use `[Symbol.toStringTag]` so non minified name is preferred when code is minified

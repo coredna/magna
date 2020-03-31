@@ -1,5 +1,5 @@
 /**
- * Magna v2.1.1 (https://github.com/coredna/magna)
+ * Magna v2.2.0 (https://github.com/coredna/magna)
  * Copywrite 2020 Andrew Fountain
  * Released under the MIT license 
  */
@@ -831,7 +831,7 @@ var Node = /*#__PURE__*/function () {
           debug: true,
           color: '#777'
         };
-        console.log("%c--> ".concat(this.constructor.name, "::").concat(method), "color: ".concat(plugin.color || '#000'), message, this);
+        console.log("%c--> ".concat(this[Symbol.toStringTag], "::").concat(method), "color: ".concat(plugin.color || '#000'), message, this);
       }
     }
   }, {
@@ -846,7 +846,7 @@ var Node = /*#__PURE__*/function () {
           debug: true,
           color: '#777'
         };
-        console.groupCollapsed("%c%s %c%s", 'color:#aaa', pad(10, this[Symbol.toStringTag]), "color: ".concat(plugin.color), "".concat(this.constructor.name, "::").concat(method));
+        console.groupCollapsed("%c%s %c%s", 'color:#aaa', pad(10, this[Symbol.toStringTag]), "color: ".concat(plugin.color), "".concat(this[Symbol.toStringTag] || this.constructor.name, "::").concat(method));
 
         for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
           args[_key - 1] = arguments[_key];
@@ -2223,6 +2223,76 @@ var Magna = /*#__PURE__*/function (_Node) {
 var _Symbol$toStringTag$2;
 _Symbol$toStringTag$2 = Symbol.toStringTag;
 
+var ExtendablePlugin = /*#__PURE__*/function (_Node) {
+  _inherits(ExtendablePlugin, _Node);
+
+  var _super = _createSuper(ExtendablePlugin);
+
+  function ExtendablePlugin(config) {
+    var _this;
+
+    _classCallCheck(this, ExtendablePlugin);
+
+    _this = _super.call(this, config);
+
+    _defineProperty(_assertThisInitialized(_this), _Symbol$toStringTag$2, 'ExtendablePlugin');
+
+    _defineProperty(_assertThisInitialized(_this), "getters", []);
+
+    var _loop = function _loop() {
+      var key = _Object$keys[_i];
+      Object.defineProperty(_assertThisInitialized(_this), key, {
+        get: function get() {
+          return _this.config[key];
+        },
+        set: function set(value) {
+          return _this.config[key] = value;
+        }
+      });
+    };
+
+    for (var _i = 0, _Object$keys = Object.keys(_this.config); _i < _Object$keys.length; _i++) {
+      _loop();
+    }
+
+    var _iterator = _createForOfIteratorHelper(_this.getters),
+        _step;
+
+    try {
+      for (_iterator.s(); !(_step = _iterator.n()).done;) {
+        key = _step.value;
+        Object.defineProperty(_assertThisInitialized(_this), key, {
+          get: function get() {
+            return _this.config[key];
+          },
+          set: function set(value) {
+            return _this.config[key] = value;
+          }
+        });
+      }
+    } catch (err) {
+      _iterator.e(err);
+    } finally {
+      _iterator.f();
+    }
+
+    return _this;
+  }
+
+  _createClass(ExtendablePlugin, [{
+    key: "init",
+    value: function init(_ref) {
+      var request = _ref.request;
+      return request.url;
+    }
+  }]);
+
+  return ExtendablePlugin;
+}(Node);
+
+var _Symbol$toStringTag$3;
+_Symbol$toStringTag$3 = Symbol.toStringTag;
+
 var Import = /*#__PURE__*/function (_Node) {
   _inherits(Import, _Node);
 
@@ -2237,7 +2307,7 @@ var Import = /*#__PURE__*/function (_Node) {
 
     _this = _super.call(this, {}, nodes);
 
-    _defineProperty(_assertThisInitialized(_this), _Symbol$toStringTag$2, 'Import');
+    _defineProperty(_assertThisInitialized(_this), _Symbol$toStringTag$3, 'Import');
 
     _this.__promise = null;
     _this.importer = importer;
@@ -2329,8 +2399,8 @@ var Import = /*#__PURE__*/function (_Node) {
   return Import;
 }(Node);
 
-var _Symbol$toStringTag$3;
-_Symbol$toStringTag$3 = Symbol.toStringTag;
+var _Symbol$toStringTag$4;
+_Symbol$toStringTag$4 = Symbol.toStringTag;
 
 var Lazy = /*#__PURE__*/function (_Node) {
   _inherits(Lazy, _Node);
@@ -2346,7 +2416,7 @@ var Lazy = /*#__PURE__*/function (_Node) {
 
     _this = _super.call(this, config, nodes);
 
-    _defineProperty(_assertThisInitialized(_this), _Symbol$toStringTag$3, 'Lazy');
+    _defineProperty(_assertThisInitialized(_this), _Symbol$toStringTag$4, 'Lazy');
 
     _this.__promise = null;
     _this.importer = importer;
@@ -2436,8 +2506,8 @@ var Lazy = /*#__PURE__*/function (_Node) {
   return Lazy;
 }(Node);
 
-var _Symbol$toStringTag$4;
-_Symbol$toStringTag$4 = Symbol.toStringTag;
+var _Symbol$toStringTag$5;
+_Symbol$toStringTag$5 = Symbol.toStringTag;
 
 var Module = /*#__PURE__*/function (_Node) {
   _inherits(Module, _Node);
@@ -2451,7 +2521,7 @@ var Module = /*#__PURE__*/function (_Node) {
 
     _this = _super.call(this, {}, nodes);
 
-    _defineProperty(_assertThisInitialized(_this), _Symbol$toStringTag$4, 'Module');
+    _defineProperty(_assertThisInitialized(_this), _Symbol$toStringTag$5, 'Module');
 
     return _this;
   }
@@ -2467,8 +2537,8 @@ var Module = /*#__PURE__*/function (_Node) {
   return Module;
 }(Node);
 
-var _Symbol$toStringTag$5;
-_Symbol$toStringTag$5 = Symbol.toStringTag;
+var _Symbol$toStringTag$6;
+_Symbol$toStringTag$6 = Symbol.toStringTag;
 
 var Plugin = /*#__PURE__*/function (_Node) {
   _inherits(Plugin, _Node);
@@ -2482,7 +2552,7 @@ var Plugin = /*#__PURE__*/function (_Node) {
 
     _this = _super.call(this, options);
 
-    _defineProperty(_assertThisInitialized(_this), _Symbol$toStringTag$5, 'Plugin');
+    _defineProperty(_assertThisInitialized(_this), _Symbol$toStringTag$6, 'Plugin');
 
     return _this;
   }
@@ -2498,8 +2568,8 @@ var Plugin = /*#__PURE__*/function (_Node) {
   return Plugin;
 }(Node);
 
-var _Symbol$toStringTag$6;
-_Symbol$toStringTag$6 = Symbol.toStringTag;
+var _Symbol$toStringTag$7;
+_Symbol$toStringTag$7 = Symbol.toStringTag;
 
 var Predicate = /*#__PURE__*/function (_Node) {
   _inherits(Predicate, _Node);
@@ -2517,7 +2587,7 @@ var Predicate = /*#__PURE__*/function (_Node) {
 
     _this = _super.call.apply(_super, [this].concat(args));
 
-    _defineProperty(_assertThisInitialized(_this), _Symbol$toStringTag$6, 'Predicate');
+    _defineProperty(_assertThisInitialized(_this), _Symbol$toStringTag$7, 'Predicate');
 
     return _this;
   }
@@ -2541,8 +2611,8 @@ var Predicate = /*#__PURE__*/function (_Node) {
   return Predicate;
 }(Node);
 
-var _Symbol$toStringTag$7;
-_Symbol$toStringTag$7 = Symbol.toStringTag;
+var _Symbol$toStringTag$8;
+_Symbol$toStringTag$8 = Symbol.toStringTag;
 
 var Route = /*#__PURE__*/function (_Predicate) {
   _inherits(Route, _Predicate);
@@ -2560,7 +2630,7 @@ var Route = /*#__PURE__*/function (_Predicate) {
       url: url
     }, nodes);
 
-    _defineProperty(_assertThisInitialized(_this), _Symbol$toStringTag$7, 'Route');
+    _defineProperty(_assertThisInitialized(_this), _Symbol$toStringTag$8, 'Route');
 
     return _this;
   }
@@ -2670,8 +2740,8 @@ _defineProperty(Route, "plugin", {
   debug: true
 });
 
-var _Symbol$toStringTag$8;
-_Symbol$toStringTag$8 = Symbol.toStringTag;
+var _Symbol$toStringTag$9;
+_Symbol$toStringTag$9 = Symbol.toStringTag;
 
 var Singleton = /*#__PURE__*/function (_Node) {
   _inherits(Singleton, _Node);
@@ -2685,7 +2755,7 @@ var Singleton = /*#__PURE__*/function (_Node) {
 
     _this = _super.call(this, options);
 
-    _defineProperty(_assertThisInitialized(_this), _Symbol$toStringTag$8, 'Singleton');
+    _defineProperty(_assertThisInitialized(_this), _Symbol$toStringTag$9, 'Singleton');
 
     _defineProperty(_assertThisInitialized(_this), "initialized", false);
 
@@ -2710,8 +2780,8 @@ var Singleton = /*#__PURE__*/function (_Node) {
   return Singleton;
 }(Node);
 
-var _Symbol$toStringTag$9;
-_Symbol$toStringTag$9 = Symbol.toStringTag;
+var _Symbol$toStringTag$a;
+_Symbol$toStringTag$a = Symbol.toStringTag;
 var ElementExists = /*#__PURE__*/function (_Predicate) {
   _inherits(ElementExists, _Predicate);
 
@@ -2726,7 +2796,7 @@ var ElementExists = /*#__PURE__*/function (_Predicate) {
       selector: selector
     }, nodes);
 
-    _defineProperty(_assertThisInitialized(_this), _Symbol$toStringTag$9, 'ElementExists');
+    _defineProperty(_assertThisInitialized(_this), _Symbol$toStringTag$a, 'ElementExists');
 
     return _this;
   }
@@ -2919,6 +2989,7 @@ var subscribe = (function (target, event, nodes) {
 console.log('test!!!!!!');
 
 exports.ElementExists = ElementExists;
+exports.ExtendablePlugin = ExtendablePlugin;
 exports.Import = Import;
 exports.Lazy = Lazy;
 exports.Magna = Magna;

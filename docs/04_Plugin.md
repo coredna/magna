@@ -1,6 +1,8 @@
 ### Plugin
 The `Plugin` class is where you are able to attach functionality to your page.
 
+See also [ExtendablePlugin](./13_ExtendablePlugin.md)
+
 ```javascript
 import Magna, { Plugin } from '@coredna/magna'
 import $ from 'jquery'
@@ -20,3 +22,4 @@ const app = new Magna([
   new MyPlugin({ selector: '#my-element' }),
 ]).start()
 ```
+

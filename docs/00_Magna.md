@@ -23,3 +23,4 @@ needs you can use the simple API to create your own plugin, If it's good you can
 * [Ajax](./10_Ajax.md)
 * [Delaying lifecycle methods](./11_Delaying_lifecycle_methods.md)
 * [Messaging between nodes](./12_Messaging_between_nodes.md)
+* [ExtendablePlugin](./13_ExtendablePlugin.md)
