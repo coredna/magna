@@ -44,7 +44,7 @@ export default class Request {
       encode: false,
       arrayFormat: 'brackets'
     })
-    this.pathname = index > -1 ? href.slice(0, index) : href
+    this.pathname = location.pathname
     // create the new href by combining the pathname and all the params
     this.href = this.pathname + (this.search ? `?${this.search}` : '')
     this.title = title

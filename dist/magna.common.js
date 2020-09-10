@@ -1,5 +1,5 @@
 /**
- * Magna v2.2.0 (https://github.com/coredna/magna)
+ * Magna v2.3.0 (https://github.com/coredna/magna)
  * Copywrite 2020 Andrew Fountain
  * Released under the MIT license 
  */
@@ -1873,7 +1873,7 @@ var Request = /*#__PURE__*/function () {
       encode: false,
       arrayFormat: 'brackets'
     });
-    this.pathname = index > -1 ? href.slice(0, index) : href;
+    this.pathname = location.pathname;
     this.href = this.pathname + (this.search ? "?".concat(this.search) : '');
     this.title = title;
     this.scrollTop = scrollTop;
