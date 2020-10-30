@@ -1,5 +1,5 @@
 /**
- * Magna v2.3.0 (https://github.com/coredna/magna)
+ * Magna v2.3.1 (https://github.com/coredna/magna)
  * Copywrite 2020 Andrew Fountain
  * Released under the MIT license 
  */
@@ -1977,7 +1977,6 @@ var Magna = /*#__PURE__*/function (_Node) {
           setScrollOnPopstate = _ref$setScrollOnPopst === void 0 ? true : _ref$setScrollOnPopst,
           _ref$request = _ref.request,
           request = _ref$request === void 0 ? null : _ref$request;
-      console.warn('test');
       this.debug = debug;
       this.env = env;
       this.setScrollOnPopstate = setScrollOnPopstate;
