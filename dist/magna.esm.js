@@ -1,5 +1,5 @@
 /**
- * Magna v2.3.1 (https://github.com/coredna/magna)
+ * Magna v2.3.3 (https://github.com/coredna/magna)
  * Copywrite 2020 Andrew Fountain
  * Released under the MIT license 
  */
@@ -2980,8 +2980,6 @@ var Subscribe = /*#__PURE__*/function (_Node) {
 var subscribe = (function (target, event, nodes) {
   return new Subscribe(target, event, nodes);
 });
-
-console.log('test!!!!!!');
 
 export default Magna;
 export { ElementExists, ExtendablePlugin, Import, Lazy, Magna, Module, Node, One, OnlyOnRouteChange, Plugin, Predicate, Route, Singleton, State, Subscribe, combineUrlParams, debounce, elementExists, log, logAction, logRoute, mergeDeepRight, one, onlyOnRouteChange, pad, prettify, radioClass, regexify$1 as regexify, route, subscribe, tap, trace, uglify };

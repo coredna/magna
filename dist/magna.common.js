@@ -1,5 +1,5 @@
 /**
- * Magna v2.3.1 (https://github.com/coredna/magna)
+ * Magna v2.3.3 (https://github.com/coredna/magna)
  * Copywrite 2020 Andrew Fountain
  * Released under the MIT license 
  */
@@ -2984,8 +2984,6 @@ var Subscribe = /*#__PURE__*/function (_Node) {
 var subscribe = (function (target, event, nodes) {
   return new Subscribe(target, event, nodes);
 });
-
-console.log('test!!!!!!');
 
 exports.ElementExists = ElementExists;
 exports.ExtendablePlugin = ExtendablePlugin;

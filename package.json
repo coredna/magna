@@ -1,6 +1,6 @@
 {
   "name": "@coredna/magna",
-  "version": "2.3.2",
+  "version": "2.3.3",
   "description": "Magna is a tree based javascript router, plugin runner and ajax framework",
   "main": "dist/magna.common.js",
   "directories": {
